@@ -1,15 +1,20 @@
 import * as csv from '@fast-csv/parse';
-import { readdirSync, writeFileSync } from 'fs';
+import { readdirSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import path from 'path';
 import { cwd } from 'process';
 
-let rawFiles = readdirSync(path.join(cwd(), '../assets/raw'));
+if (!existsSync(path.join(cwd(), 'src/assets/data'))) {
+  console.log('Creating data directory');
+  mkdirSync(path.join(cwd(), 'src/assets/data'));
+}
+
+let rawFiles = readdirSync(path.join(cwd(), 'src/assets/raw'));
 
 for (let file of rawFiles) {
   let programName = file.replace('.csv', '');
   let data = [];
   csv
-    .parseFile(path.join(cwd(), `../assets/csv/${file}`), {
+    .parseFile(path.join(cwd(), `src/assets/raw/${file}`), {
       ignoreEmpty: true,
       headers: headers => headers.map(h => !["name", "id", "rank"].includes(h?.toLowerCase()) ? undefined : h.toLowerCase().replace(/ /g, '_')),
       renameHeaders: true,
@@ -19,9 +24,9 @@ for (let file of rawFiles) {
       data.push(row);
     })
     .on('end', (rowCount) => {
-      console.log(`Parsed ${rowCount} rows`);
-      let destPath = path.join(cwd(), `../assets/data/${programName}.json`);
+      let destPath = path.join(cwd(), `src/assets/data/${programName}.json`);
       console.log(destPath);
+      console.log(`Parsed ${rowCount} rows`);
       writeFileSync(destPath, JSON.stringify({
         name: programName,
         data: data,
