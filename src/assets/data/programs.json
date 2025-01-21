@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Infinity",
+    "logo": "infinity.png",
+    "slug": "infinity"
+  },
+  {
+    "name": "Hackathon",
+    "logo": "hackathon.png",
+    "slug": "hackathon"
+  }
+]

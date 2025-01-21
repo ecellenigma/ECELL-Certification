@@ -41,5 +41,5 @@ yarn-error.log*
 next-env.d.ts
 
 # project specific files
-/src/assets/raw
-/src/assets/data
+# /src/assets/raw
+# /src/assets/data
