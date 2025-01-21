@@ -14,4 +14,4 @@ yarn dev
 
 Dev server will start at [localhost:3000](http://localhost:3000)
 
-Example certificate url: https://localhost:3000/certificates/infinity/ARNAV.pdf
+Example certificate url: http://localhost:3000/certificates/infinity/ARNAV.pdf
