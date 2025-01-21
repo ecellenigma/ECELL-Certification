@@ -10,6 +10,9 @@
     "csv:migrate": "node ./src/scripts/csv-migrate.js"
   },
   "dependencies": {
+    "@pdfme/common": "^5.2.16",
+    "@pdfme/generator": "^5.2.16",
+    "@pdfme/schemas": "^5.2.16",
     "next": "15.1.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
