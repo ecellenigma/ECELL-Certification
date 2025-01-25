@@ -73,6 +73,29 @@ function TemplateEditor(props: {
     }
   }, []);
 
+  const onBaseTemplateChange = useCallback((Template: File) => {
+    if (editor.current) {
+      readFile(Template, 'dataURL').then((json) => {
+        if (editor.current) {
+          editor.current.updateTemplate(
+            Object.assign(cloneDeep(editor.current.getTemplate()), {
+              basePdf: json,
+            })
+          );
+        }
+      });
+    }
+  }, []);
+
+  const onEdit = useCallback(() => {
+    if (editor.current) {
+      const template = editor.current.getTemplate();
+      if (props.onSubmit) {
+        props.onSubmit(template);
+      }
+    }
+  }, [props.onSubmit]);
+
   const onFinalize = useCallback(() => {
     if (editor.current) {
       const template = editor.current.getTemplate();
@@ -97,7 +120,7 @@ function TemplateEditor(props: {
     if (props.template) {
       template.current = props.template;
     }
-  }, [props.template]);
+  }, [props.template, onBaseTemplateChange]);
 
   useEffect(() => {
     if (props.basePdf && editor.current) {
@@ -105,15 +128,26 @@ function TemplateEditor(props: {
     }
   }, [props.basePdf, onBasePDFChange]);
 
+  
+
   return (
     <>
       <div className="flex-1 w-full px-4 pb-1 flex justify-end">
         <button
-          className="px-4 py-2 mt-1 h-fit text-white bg-green-700 rounded-md shadow-sm hover:bg-green-600 font-medium text-sm"
+          className="px-4 py-2 mt-1 h-fit text-white bg-indigo-500  rounded-md shadow-sm hover:bg-indigo-700  font-medium text-sm"
           onClick={onFinalize}
         >
           Finalize
         </button>
+        <button
+          className="px-4 py-2 mt-1 h-fit text-white bg-indigo-500  rounded-md shadow-sm hover:bg-indigo-700  font-medium text-sm"
+          onClick={onEdit}
+        >
+          Edit
+        </button>
+        <div className="App">
+     
+    </div>
       </div>
       <div ref={uiRef} className="flex-1 w-full" />
     </>
