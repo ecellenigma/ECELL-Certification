@@ -1,15 +1,16 @@
 "use client";
 import Editor from '@/components/TemplateEditor';
-import React, { useState ,ChangeEvent} from 'react';
+import React, { useState ,ChangeEvent, useContext} from 'react';
 import { Template } from '@pdfme/common';
 import Papa from 'papaparse';
 import {db} from '../../../firebase'
 import { addDoc, collection } from 'firebase/firestore';
+import { AuthContext } from '../../lib/AuthContext';
 
 export default function TemplateEditorExample() {
+  const { user } = useContext(AuthContext); 
   const [pdf, setPdf] = useState<File | null>(null);
   const [template, setTemplate] = useState<Template | null>(null);
-
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target && e.target.files) {
       setPdf(e.target.files[0]);
@@ -17,8 +18,9 @@ export default function TemplateEditorExample() {
   };
     const [csvFile, setCsvFile] = useState<File | null>(null);
     const [name,setName] = useState('')
+    const [message,setMessage] = useState('')
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0]; // Optional chaining to handle cases where files might be undefined
+      const file = e.target.files?.[0]; 
       if (file) {
           setCsvFile(file);
       }
@@ -41,6 +43,7 @@ export default function TemplateEditorExample() {
         }
 
         console.log('CSV data uploaded to Firestore!');
+        setMessage('CSV data uploaded successfully!')
       },
     });
   }
@@ -52,6 +55,7 @@ export default function TemplateEditorExample() {
 
   return (
     <>
+    {user ? (
     <div className="flex flex-col items-center  justify-center background-color-gray-100 margin-top-100 w-3/4 my-12 mx-auto">
     <h2 className="text-4xl text-center font-semibold text-neutral-800 dark:text-neutral-200 mb-8 font-dm-serif-display">
           Admin Panel
@@ -90,7 +94,15 @@ export default function TemplateEditorExample() {
           fields={[{ name: 'name' }, { name: 'age', y: 18 }, { name: 'rank', y: 36 }]}
         />
       )}
+      <h5 className=" text-center font-semibold text-red-400 dark:text-white mb-8 font-dm-serif-display">
+          {message}
+        </h5>
       </div>
+    ) : (
+      <a href='/admin-login' className="text-4xl text-center font-semibold text-neutral-800 dark:text-neutral-200 mb-8 font-dm-serif-display">
+          Please Login
+        </a>
+    ) }
     </>
   );
 }
