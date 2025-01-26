@@ -4,7 +4,7 @@ import React, { useState ,ChangeEvent, useContext} from 'react';
 import { Template } from '@pdfme/common';
 import Papa from 'papaparse';
 import {db} from '../../../firebase'
-import { addDoc, collection } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { AuthContext } from '../../lib/AuthContext';
 
 export default function TemplateEditorExample() {
@@ -33,10 +33,9 @@ export default function TemplateEditorExample() {
       complete: async (results) => {
         console.log('CSV data:', results.data);
         for (const row of results.data) {
-          console.log('row:', row)
+          console.log('row:', row.Id)
           try {
-            const doc =await addDoc(collection(db, `${name}`), row);
-              console.log(doc);
+            await setDoc(doc(db, `${name}`, `${row.Id}`), row);
           } catch (error) {
             console.error("Error adding document: ", error);
           }
