@@ -1,5 +1,7 @@
 import { createRequire } from 'node:module';
 import { generate } from '@pdfme/generator';
+//import { collection, getDocs } from "firebase/firestore"; 
+//import {db} from '../../firebase'
 
 export interface Participant {
   id: string;
@@ -22,6 +24,9 @@ export async function generateCertificate(id: string, programSlug: string) {
   }
 
   const { slug } = program;
+
+  //const querySnapshot = await getDocs(collection(db, `${slug}`, `${id}`));
+  //const participants: Participant[] = querySnapshot.docs.map(doc => doc.data() as Participant);
   const participants = createRequire(import.meta.url)(`../assets/data/${slug}.json`).data;
 
   const participant: Participant = participants.find((p: Participant) => p.id === id);
