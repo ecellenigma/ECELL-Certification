@@ -40,9 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env.local
-package-lock.json
+
 # project specific files
 # /src/assets/raw
 # /src/assets/data
-package-lock.json
-package.json
