@@ -135,7 +135,7 @@ export default function Home() {
           </button>
         </form>
         {pdf && (
-          <div className="mt-8 p-6 md:p-8 w-full lg:max-w-xl flex flex-col items-center">
+          <div className="mt-2 p-6 md:p-8 w-full lg:max-w-xl flex flex-col items-center">
             <Document
               file={pdf}
               className="w-full border-none rounded-lg shadow-sm overflow-hidden"

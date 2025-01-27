@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import '@fontsource-variable/inter';
 import '@fontsource/dm-serif-display';
 import "./globals.css";
+import { AuthProvider } from "@/lib/AuthContext";
 
 export const metadata: Metadata = {
   title: "CertifiCat",
@@ -14,8 +15,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    <AuthProvider>
     <html lang="en">
       <body className={`font-inter antialiased bg-neutral-50 dark:bg-neutral-950`}>{children}</body>
     </html>
+    </AuthProvider>
   );
 }
