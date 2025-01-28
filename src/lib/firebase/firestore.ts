@@ -1,4 +1,4 @@
-import { doc, setDoc, getDoc, writeBatch, runTransaction, arrayUnion } from "firebase/firestore";
+import { doc, setDoc, getDoc, writeBatch, runTransaction, arrayUnion,deleteDoc,arrayRemove,updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase/clientApp";
 import { convertFirestoreArray, sanatizeProgramName } from "@/lib/helpers";
 import { Participant } from "@/types";
@@ -95,6 +95,38 @@ export async function getParticipant(id: string, program: string) {
     return docSnap.data();
   } else {
     console.log("No such document!");
+  }
+}
+export async function getParticipants(program: string)
+{
+  const docRef = doc(db, `${program}`);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    console.log("Document data:", docSnap.data());
+  } 
+  else {
+  console.log("No such document!");
+}
+}
+
+
+export async function deleteProgram(program: string){
+  const programRef = doc(db,'programs_list', 'programs');
+  await updateDoc(programRef, {
+    value: arrayRemove(program)
+});
+  await deleteDoc(doc(db,`${program}_schemas`))
+  await deleteDoc(doc(db,`${program}`))
+}
+
+export async function setParticipant(program: string, participant: Participant)
+{
+  try{
+    await setDoc(doc(db,`${program}`, participant.id), participant);
+  }
+  catch(err){
+    console.log(err);
   }
 }
 
