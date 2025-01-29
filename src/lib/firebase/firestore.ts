@@ -1,4 +1,4 @@
-import { doc, setDoc, getDoc, writeBatch, runTransaction, arrayUnion } from "firebase/firestore";
+import { doc, setDoc, getDoc, writeBatch, runTransaction, arrayUnion, deleteDoc, arrayRemove, updateDoc, getDocs, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase/clientApp";
 import { convertFirestoreArray, sanatizeProgramName } from "@/lib/helpers";
 import { Participant } from "@/types";
@@ -26,6 +26,18 @@ export async function getPrograms() {
     return convertFirestoreArray(docSnap.data().value) as string[];
   }
   else return [];
+}
+
+export async function addParticipant(program: string, participant: Participant) {
+  try {
+    const participantDocRef = doc(db, program, participant.id);
+    await setDoc(participantDocRef, participant);
+    console.log("Participant added to Firestore!");
+    return true;
+  } catch (err) {
+    console.log("Error adding participant", err);
+    return false;
+  }
 }
 
 export async function getSchemas(program: string) {
@@ -97,6 +109,59 @@ export async function getParticipant(id: string, program: string) {
     console.log("No such document!");
   }
 }
+export async function getParticipants(program: string) {
+
+  try{
+    const querySnapshot = await getDocs(collection(db,`${program}`));
+    return querySnapshot.docs.map(doc => doc.data() as Participant);
+  }
+  catch(err){
+    console.log(err);
+    return [];
+  }
+
+}
+
+export async function deleteProgram(program: string) {
+  try {
+    const programRef = doc(db, 'programs_list', 'programs');
+    await updateDoc(programRef, {
+      value: arrayRemove(program)
+    });
+    await deleteDoc(doc(db, `${program}_schemas`));
+    await deleteDoc(doc(db, `${program}`));
+    console.log("Program deleted from Firestore!");
+    return true;
+  } catch (err) {
+    console.log("Error deleting program", err);
+    return false;
+  }
+}
+
+
+export async function setParticipant(program: string, participantId: string, participant: Participant) {
+  try {
+    const participantDocRef = doc(db, program, participantId);
+    await updateDoc(participantDocRef, { ...participant });
+    console.log("Participant updated in Firestore!");
+    return true;
+  } catch (err) {
+    console.log("Error updating participant", err);
+    return false;
+  }
+}
+
+export async function deleteParticipant(program: string, participantId: string) {
+  try {
+    const participantDocRef = doc(db, program, participantId);
+    await deleteDoc(participantDocRef);
+    console.log("Participant deleted from Firestore!");
+    return true;
+  } catch (err) {
+    console.log("Error deleting participant", err);
+    return false;
+  }
+}
 
 export async function setParticipants(program: string, participants: Participant[]) {
   try {
@@ -112,8 +177,10 @@ export async function setParticipants(program: string, participants: Participant
   }
   const batch = writeBatch(db);
   for (const participant of participants) {
-    batch.set(doc(db, program, participant.id), participant);
+    const participantDocRef = doc(db, program, participant.id);
+    batch.set(participantDocRef, participant);
   }
+
 
   // add the program name to list of program names
   const docSnap = await getDoc(doc(db, "programs_list", "programs"));
