@@ -8,6 +8,13 @@
 - CertifiCat is **open-source** and **free** to use.
 - And most importantly, **cats**...🧶🐈
 
+### Screenshots
+
+| ![Claim Certificate](screenshots/claim.png) | ![Create Event](screenshots/create.png) | ![Admin Dashboard](screenshots/dashbaord.png) |
+| --- | --- | --- |
+| Claim Certificate | Create Event | Admin Dashboard |
+
+
 ## Getting Started
 
 clone the repository:
