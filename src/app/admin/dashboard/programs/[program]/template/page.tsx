@@ -7,9 +7,15 @@ import Papa from "papaparse";
 import { Participant } from "@/types";
 import TemplateEditor from "@/components/TemplateEditor";
 import { Template } from "@pdfme/common";
-import { ArrowRight, UploadCloud, LoaderCircleIcon } from "lucide-react";
+import {
+  ArrowRight,
+  UploadCloud,
+  LoaderCircleIcon,
+  LogOutIcon,
+} from "lucide-react";
 import Notice from "@/components/Notice";
 import { useAuth } from "@/providers/AuthContext";
+import { signOut } from "@/lib/firebase/auth";
 
 export default function TemplatePage() {
   const { program } = useParams();
@@ -101,78 +107,89 @@ export default function TemplatePage() {
   return (
     <>
       {user && !authLoading ? (
-        <div className="text-white p-6 flex flex-col items-center">
-          <h1 className="text-3xl font-bold mb-6">Edit Program</h1>
-          {message && <Notice type="success" message={message} />}
-          <div className="bg-gray-900 p-8 rounded-lg shadow-lg w-full max-w-4xl">
-            <div className="mb-4">
-              <label className="block text-white mb-2" htmlFor="basePdf">
-                Upload Base PDF
-              </label>
-              <input
-                className="w-full p-2 rounded bg-gray-700 text-white file:bg-indigo-700 file:text-white file:font-bold file:px-4 file:py-2 file:rounded file:cursor-pointer file:border-0"
-                type="file"
-                id="basePdf"
-                accept="application/pdf"
-                onChange={handleBasePdfChange}
-              />
-              <div className="flex justify-center mt-2">
-                <button
-                  className="bg-indigo-700 hover:bg-indigo-900 text-white font-bold py-2 px-4 rounded flex items-center w-full justify-center"
-                  onClick={handleBasePdfUpload}
-                >
-                  Upload Base PDF <ArrowRight className="ml-2 h-5 w-5" />
-                </button>
+        <>
+          <div className="w-full flex justify-end px-4">
+            <button
+              className="flex items-center text-sm justify-center gap-2 px-4 mt-4 py-2 w-fit rounded-md shadow-sm bg-indigo-700 hover:shadow-md transition duration-150 ease active:scale-[99%] text-white"
+              onClick={() => signOut()}
+            >
+              <LogOutIcon className="size-4" />
+              Logout
+            </button>
+          </div>
+          <div className="text-white p-6 flex flex-col items-center">
+            <h1 className="text-3xl font-bold mb-6">Edit Program</h1>
+            {message && <Notice type="success" message={message} />}
+            <div className="bg-gray-900 p-8 rounded-lg shadow-lg w-full max-w-4xl">
+              <div className="mb-4">
+                <label className="block text-white mb-2" htmlFor="basePdf">
+                  Upload Base PDF
+                </label>
+                <input
+                  className="w-full p-2 rounded bg-gray-700 text-white file:bg-indigo-700 file:text-white file:font-bold file:px-4 file:py-2 file:rounded file:cursor-pointer file:border-0"
+                  type="file"
+                  id="basePdf"
+                  accept="application/pdf"
+                  onChange={handleBasePdfChange}
+                />
+                <div className="flex justify-center mt-2">
+                  <button
+                    className="bg-indigo-700 hover:bg-indigo-900 text-white font-bold py-2 px-4 rounded flex items-center w-full justify-center"
+                    onClick={handleBasePdfUpload}
+                  >
+                    Upload Base PDF <ArrowRight className="ml-2 h-5 w-5" />
+                  </button>
+                </div>
               </div>
-            </div>
-            <div className="mb-4">
-              <label className="block text-white mb-2" htmlFor="csvFile">
-                Upload CSV
-              </label>
-              <input
-                className="w-full p-2 rounded bg-gray-700 text-white file:bg-indigo-700 file:text-white file:font-bold file:px-4 file:py-2 file:rounded file:cursor-pointer file:border-0"
-                type="file"
-                id="csvFile"
-                accept=".csv"
-                onChange={onCsvFileChange}
-              />
-              <div className="flex justify-center mt-2">
-                <button
-                  className="bg-indigo-700 hover:bg-indigo-900 text-white font-bold py-2 px-4 rounded flex items-center w-full justify-center"
-                  onClick={handleUpload}
-                  disabled={isUploadingCsv}
-                >
-                  {isUploadingCsv ? (
-                    <LoaderCircleIcon className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <>
-                      <UploadCloud className="h-5 w-5" />
-                      <span className="ml-2">Upload CSV</span>
-                    </>
-                  )}
-                </button>
+              <div className="mb-4">
+                <label className="block text-white mb-2" htmlFor="csvFile">
+                  Upload CSV
+                </label>
+                <input
+                  className="w-full p-2 rounded bg-gray-700 text-white file:bg-indigo-700 file:text-white file:font-bold file:px-4 file:py-2 file:rounded file:cursor-pointer file:border-0"
+                  type="file"
+                  id="csvFile"
+                  accept=".csv"
+                  onChange={onCsvFileChange}
+                />
+                <div className="flex justify-center mt-2">
+                  <button
+                    className="bg-indigo-700 hover:bg-indigo-900 text-white font-bold py-2 px-4 rounded flex items-center w-full justify-center"
+                    onClick={handleUpload}
+                    disabled={isUploadingCsv}
+                  >
+                    {isUploadingCsv ? (
+                      <LoaderCircleIcon className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <>
+                        <UploadCloud className="h-5 w-5" />
+                        <span className="ml-2">Upload CSV</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
-            {basePdfUrl && (
-              <div className="mt-4 flex justify-center">
-                <a
-                  className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded flex items-center w-full justify-center"
-                  href={basePdfUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View Base PDF <ArrowRight className="ml-2 h-5 w-5" />
-                </a>
+              {basePdfUrl && (
+                <div className="mt-4 flex justify-center">
+                  <a
+                    className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded flex items-center w-full justify-center"
+                    href={basePdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View Base PDF <ArrowRight className="ml-2 h-5 w-5" />
+                  </a>
+                </div>
+              )}
+              <div className="mt-6 w-full">
+                <TemplateEditor
+                  template={template}
+                  onSubmit={handleTemplateSave}
+                />
               </div>
-            )}
-            <div className="mt-6 w-full">
-              <TemplateEditor
-                template={template}
-                onSubmit={handleTemplateSave}
-              />
             </div>
           </div>
-        </div>
+        </>
       ) : (
         <div className="grid place-items-center p-8 gap-2 min-h-[100dvh]">
           <LoaderCircleIcon className="size-16 stroke-indigo-700 animate-spin" />
