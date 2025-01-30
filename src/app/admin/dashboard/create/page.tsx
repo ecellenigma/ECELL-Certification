@@ -14,17 +14,24 @@ import {
   UploadCloud,
   FilePlus2Icon,
   ArrowDown,
+  InfoIcon,
 } from "lucide-react";
+import TokenInput, { Option } from "@/components/TokenInput";
+import { sanatizeProgramName } from "@/lib/helpers";
+import { MultiValue } from "react-select";
 //import { uploadBasePdf } from "@/lib/firebase/storage";
 
-export default function TemplateEditorExample() {
+export default function Create() {
   const { user, authLoading } = useAuth();
   const [isUploadingCsv, setIsUploadingCsv] = useState(false);
   // const [isUploadingTemplate, setIsUploadingTemplate] = useState(false);
   const [pdf, setPdf] = useState<File | null>(null);
   const [template, setTemplate] = useState<Template | null>(null);
-  const [parsedValues, setParsedValues] = useState<{ [key: string]: unknown }[] | null>(null);
-  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [parsedValues, setParsedValues] = useState<
+    { [key: string]: unknown }[] | null
+  >(null);
+  const [tokenInputError, setTokenInputError] = useState<string | null>(null);
+  const [fieldsToImport, setFieldsToImport] = useState<Option[]>([]);
   const [name, setName] = useState("");
   const [message, setMessage] = useState<string | null>(null);
 
@@ -38,32 +45,66 @@ export default function TemplateEditorExample() {
     setMessage(null);
     const file = e.target.files?.[0];
     if (file) {
-      setCsvFile(file);
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        transformHeader: (header) =>
+          sanatizeProgramName(header.trim().toLowerCase()),
+        complete: async (results) => {
+          const data = results.data as { [key: string]: unknown }[];
+          console.log("CSV data:", data);
+          setParsedValues(data as { [key: string]: unknown }[]);
+          setFieldsToImport(
+            Object.keys(data[0]).map((k) => {
+              const sanatized = sanatizeProgramName(k);
+              return {
+                value: sanatized,
+                label: sanatizeProgramName(sanatized),
+              };
+            })
+          );
+          if(!fieldsToImport.some((option) => option.value === "id")) {
+              setTokenInputError("id field is required");
+          }
+        },
+      });
     }
   };
+
+  const handleTokenInputChange = (newValue: MultiValue<Option>) => {
+    if (newValue.length === 0 || !newValue.some((option) => option.value === "id")) {
+      setTokenInputError("id field is required");
+    } else {
+      setTokenInputError(null);
+    }
+    setFieldsToImport(newValue as Option[]);
+  };
+
   const handleUpload = async () => {
-    if (!csvFile) return;
+    if (!parsedValues) return;
     setIsUploadingCsv(true);
-    Papa.parse(csvFile, {
-      header: true,
-      skipEmptyLines: true,
-      transformHeader: (header) => header.trim().toLowerCase(),
-      complete: async (results) => {
-        console.log("CSV data:", results.data);
-        setParsedValues(results.data as { [key: string]: unknown }[]);
-        const success = await setParticipants(
-          name,
-          results.data as Participant[]
-        );
-        setIsUploadingCsv(false);
-        if (!success) {
-          console.log("Error uploading participants");
-          return;
-        }
-        console.log("CSV data uploaded to Firestore!");
-        setMessage("CSV data uploaded successfully!");
-      },
+    const fieldKeys = fieldsToImport.map((field) => field.value);
+    const dataToUpload = parsedValues.map((participant) => {
+      // eslint-disable-next-line prefer-const
+      let newParticipant: { [key: string]: unknown } = {};
+      for (const key of fieldKeys) {
+        newParticipant[key] = participant[key];
+      }
+      return newParticipant;
     });
+    console.log(dataToUpload, name);
+
+    const success = await setParticipants(
+      name,
+      dataToUpload as unknown as Participant[]
+    );
+    setIsUploadingCsv(false);
+    if (!success) {
+      console.log("Error uploading participants");
+      return;
+    }
+    console.log("CSV data uploaded to Firestore!");
+    setMessage("CSV data uploaded successfully!");
   };
 
   const onSubmit = async (template: Template) => {
@@ -78,8 +119,8 @@ export default function TemplateEditorExample() {
     console.log("Templates updated");
     setMessage("Schema updated successfully");
     //if(pdf){
-        //await uploadBasePdf(pdf, name);
-        //console.log(uploadBasePdf(pdf, name));
+    //await uploadBasePdf(pdf, name);
+    //console.log(uploadBasePdf(pdf, name));
     //}
   };
 
@@ -96,20 +137,24 @@ export default function TemplateEditorExample() {
               Logout
             </button>
           </div>
-          <form className="flex flex-col items-center max-w-xs justify-center w-3/4 mt-12 mx-auto" onSubmit={(e) => e.preventDefault()}>
+          <form
+            className="flex flex-col items-center max-w-xs justify-center w-3/4 mt-12 mx-auto"
+            onSubmit={(e) => e.preventDefault()}
+          >
             <h2 className="text-4xl text-center font-semibold text-neutral-800 dark:text-neutral-200 mb-16 font-dm-serif-display">
-              Admin Panel
+              Create a Program
             </h2>
             {message && <Notice type="success" message={message} />}
             <div className="flex flex-col w-full">
               <label
-                htmlFor="user_id"
+                htmlFor="program_name"
                 className="font-semibold text-sm text-neutral-700 dark:text-neutral-300 mb-1"
               >
-                Program Name:
+                Program Name
               </label>
               <input
                 required
+                id="program_name"
                 className="w-full mb-4 border shadow-sm font-medium text-neutral-600 dark:text-neutral-300 dark:bg-black dark:placeholder:text-neutral-600 border-neutral-300 dark:border-neutral-800 bg-transparent rounded-md px-4 py-3 text-sm"
                 type="text"
                 placeholder="Enter Name"
@@ -121,23 +166,52 @@ export default function TemplateEditorExample() {
             </div>
             <div className="flex flex-col w-full">
               <label
-                htmlFor="user_id"
+                htmlFor="csv"
                 className="font-semibold text-sm text-neutral-700 dark:text-neutral-300 mb-1"
               >
-                Participants Data:
+                Participants Data <span className="text-xs text-neutral-500 font-medium">(id field is mandatory)</span>
               </label>
               <input
-                className="block w-full border shadow-sm font-medium bg-neutral-black dark:bg-black dark:placeholder:text-neutral-600 px-4 py-3 text-sm text-neutral-600 dark:text-neutral-400 placeholder-slate-950 dark:border-neutral-800 rounded-md file:bg-transparent file:cursor-pointer file:text-neutral-600 dark:file:text-neutral-200 border-neutral-300 file:border-0  cursor-pointer"
+                className="block w-full mb-4 border shadow-sm font-medium bg-neutral-black dark:bg-black dark:placeholder:text-neutral-600 p-2 text-sm text-neutral-600 dark:text-neutral-400 placeholder-neutral-950 dark:border-neutral-800 rounded-md file:bg-indigo-700 file:cursor-pointer file:rounded-md file:px-3 file:py-2 file:mr-2 file:text-white border-neutral-300 file:border-0 cursor-pointer"
                 type="file"
                 accept=".csv"
+                id="csv"
                 onChange={onCsvFileChange}
                 required
               />
             </div>
+            {parsedValues && (
+              <div className="flex flex-col w-full">
+                <label
+                  htmlFor="import_fields"
+                  className="font-semibold text-sm text-neutral-700 dark:text-neutral-300 mb-1"
+                >
+                  Fields to Import
+                </label>
+                <TokenInput
+                  options={Object.keys(parsedValues[0]).map((k) => {
+                    const sanatized = sanatizeProgramName(k);
+                    return {
+                      value: sanatized,
+                      label: sanatizeProgramName(sanatized),
+                    };
+                  })}
+                  value={fieldsToImport}
+                  onChange={handleTokenInputChange}
+                />
+                {tokenInputError && (
+                  <span className="text-sm p-2 pb-0 text-red-600 dark:tex-red-500 inline-flex items-center">
+                    <InfoIcon className="size-4 mr-1 inline stroke-current" />
+                    {tokenInputError}
+                  </span>
+                )}
+              </div>
+            )}
             <button
+              disabled={!!tokenInputError || !fieldsToImport.length}
               onClick={handleUpload}
               type="submit"
-              className="flex items-center mt-6 justify-center gap-2 px-4 py-2 w-full rounded-md shadow-sm bg-indigo-700 hover:shadow-md transition duration-150 ease active:scale-[99%] text-white"
+              className="flex items-center mt-6 justify-center gap-2 px-4 py-2 w-full disabled:cursor-not-allowed disabled:opacity-70 rounded-md shadow-sm bg-indigo-700 hover:shadow-md transition duration-150 ease active:scale-[99%] text-white"
             >
               {isUploadingCsv ? (
                 <LoaderCircleIcon className="size-5 my-0.5 animate-spin" />
@@ -170,7 +244,7 @@ export default function TemplateEditorExample() {
                 href={`data:application/json;base64,${btoa(
                   JSON.stringify(template)
                 )}`}
-                download={`${name}.json` || "template.json"}  
+                download={`${name}.json` || "template.json"}
                 className="flex items-center justify-center gap-2 px-4 py-2 max-w-xs w-full rounded-md shadow-sm bg-indigo-700 hover:shadow-md transition duration-150 ease active:scale-[99%] text-white text-sm"
               >
                 <ArrowDown className="size-4" />
@@ -181,11 +255,11 @@ export default function TemplateEditorExample() {
                 basePdf={pdf}
                 onSubmit={onSubmit}
                 fields={(() => {
-                  console.log(parsedValues);
-                  return parsedValues
-                    ? Object.keys(parsedValues[0]).map((key, i) => {
+                  console.log(fieldsToImport);
+                  return fieldsToImport
+                    ? fieldsToImport.map((option, i) => {
                         return {
-                          name: key,
+                          name: option.value,
                           y: i * 18,
                         };
                       })
