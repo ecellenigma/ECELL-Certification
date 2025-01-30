@@ -93,14 +93,14 @@ function TemplateEditor(props: {
     }
   }, []);
 
-  const onEdit = useCallback(() => {
-    if (editor.current) {
-      const template = editor.current.getTemplate();
-      if (props.onSubmit) {
-        props.onSubmit(template);
-      }
-    }
-  }, [props.onSubmit]);
+  // const onEdit = useCallback(() => {
+  //   if (editor.current) {
+  //     const template = editor.current.getTemplate();
+  //     if (props.onSubmit) {
+  //       props.onSubmit(template);
+  //     }
+  //   }
+  // }, [props.onSubmit]);
 
   const onFinalize = useCallback(() => {
     if (editor.current) {
@@ -143,12 +143,12 @@ function TemplateEditor(props: {
         >
           Finalize
         </button>
-        <button
+        {/* <button
           className="flex items-center justify-center gap-2 px-4 py-2 w-fit rounded-md shadow-sm bg-indigo-700 hover:shadow-md transition duration-150 ease active:scale-[99%] text-white text-sm font-medium"
           onClick={onEdit}
         >
           Edit
-        </button>
+        </button> */}
         <div className="App"></div>
       </div>
       <div ref={uiRef} className="flex-1 w-full" />
