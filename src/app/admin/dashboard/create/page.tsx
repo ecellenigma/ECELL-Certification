@@ -63,6 +63,9 @@ export default function Create() {
               };
             })
           );
+          if(!fieldsToImport.some((option) => option.value === "id")) {
+              setTokenInputError("id field is required");
+          }
         },
       });
     }
