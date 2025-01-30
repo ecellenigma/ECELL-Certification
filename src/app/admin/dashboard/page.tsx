@@ -2,8 +2,17 @@
 import { useState, useEffect } from "react";
 import { getPrograms, deleteProgram } from "@/lib/firebase/firestore";
 import Link from "next/link";
-import { Edit, LoaderCircleIcon, Trash2 } from "lucide-react";
+import {
+  LayoutTemplate,
+  LoaderCircleIcon,
+  LogOutIcon,
+  Plus,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { useAuth } from "@/providers/AuthContext";
+import { formatProgramName } from "@/lib/helpers";
+import { signOut } from "@/lib/firebase/auth";
 
 type Program = Array<string>;
 
@@ -20,65 +29,83 @@ export default function Programs() {
   }, []);
 
   const handleDelete = async (program: string) => {
-    await deleteProgram(program);
+    const action = confirm(
+      `Are you sure you want to delete program "${program}"?`
+    );
+    if (!action) return;
+    const success = await deleteProgram(program);
+    if (!success)
+      return alert(`An error occured deleting program "${program}"`);
     // Refresh programs list
-    const programsRef: Program = await getPrograms();
-    setPrograms(programsRef);
+    setPrograms(programs.filter((p) => p !== program));
   };
 
   return (
     <>
       {user && !authLoading ? (
-        <div className="text-white p-6 flex flex-col items-center">
-          <h1 className="text-3xl font-bold mb-6">Programs</h1>
-          <div className="bg-gray-900 p-8 rounded-lg shadow-lg w-full max-w-4xl">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {programs.map((program, index) => (
-                <div
-                  key={index}
-                  className="relative bg-indigo-700 p-6 rounded-lg shadow-lg text-center"
+        <>
+          <div className="w-full flex justify-end px-4">
+            <button
+              className="flex items-center text-sm justify-center gap-2 px-4 mt-4 py-2 w-fit rounded-md shadow-sm bg-indigo-700 hover:shadow-md transition duration-150 ease active:scale-[99%] text-white"
+              onClick={() => signOut()}
+            >
+              <LogOutIcon className="size-4" />
+              Logout
+            </button>
+          </div>
+          <div className="text-white p-6 md:p-8 flex flex-col items-center">
+            <h1 className="text-3xl font-bold mb-8 font-dm-serif-display">
+              Programs
+            </h1>
+            <div className="flex justify-center px-4 sm:px-8 w-full max-w-5xl">
+              <div className="grid w-full grid-cols-1 auto-rows-min max-w-sm md:max-w-none md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {programs.map((program, index) => (
+                  <div
+                    key={index}
+                    className="border border-neutral-300 dark:border-neutral-800 p-2 rounded-lg flex flex-col justify-between gap-6"
+                  >
+                    <div className="flex justify-between items-start gap-3 pl-1.5">
+                      <span className="text-xl flex-1 mt-0.5 font-semibold">
+                        {formatProgramName(program)}
+                      </span>
+                      <button
+                        className="p-2 max-h-fit rounded-md bg-red-500 hover:bg-red-600 dark:bg-red-700 dark:hover:bg-red-600 active:scale[99%] transition-transform duration-100 ease"
+                        onClick={() => handleDelete(program)}
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
+                    <div className="flex flex-col justify-center gap-2 p-1">
+                      <Link
+                        href={`dashboard/programs/${program}/participants`}
+                        className="w-full px-3 py-2 text-sm font-medium flex justify-center items-center gap-2 rounded-md bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-400 dark:hover:bg-neutral-700 cursor-pointer transition-transform active:scale-[99%] duration-100 ease"
+                      >
+                        <Users className="size-4" />
+                        <span>Edit Participants</span>
+                      </Link>
+                      <Link
+                        href={`dashboard/programs/${program}/template`}
+                        className="w-full px-3 py-2 text-sm font-medium flex justify-center items-center gap-2 rounded-md bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-400 dark:hover:bg-neutral-700 cursor-pointer transition-transform active:scale-[99%] duration-100 ease"
+                      >
+                        <LayoutTemplate className="size-4" />
+                        <span>Edit Template</span>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+                <Link
+                  href={`dashboard/create`}
+                  className="border p-6 min-h-36 md:min-h-none border-neutral-300 dark:border-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-900 rounded-lg flex flex-col justify-center items-center gap-2"
                 >
-                  <h2 className="text-2xl font-semibold mb-4">{program}</h2>
-                  <div className="absolute top-2 left-2">
-                    <Link
-                      href={`dashboard/programs/${program}/participants`}
-                      legacyBehavior
-                    >
-                      <a className="text-blue-300 hover:text-blue-500">
-                        <Edit className="h-5 w-5" />
-                      </a>
-                    </Link>
-                  </div>
-                  <div className="absolute top-2 right-2">
-                    <button
-                      className="text-red-300 hover:text-red-500"
-                      onClick={() => handleDelete(program)}
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </div>
-                  <div className="flex justify-center space-x-4 mt-6">
-                    <Link
-                      href={`dashboard/programs/${program}/template`}
-                      legacyBehavior
-                    >
-                      <a className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
-                        Details
-                      </a>
-                    </Link>
-                  </div>
-                </div>
-              ))}
-              <div className="bg-gray-800 p-6 rounded-lg shadow-lg flex items-center justify-center">
-                <Link href={`dashboard/create`} legacyBehavior>
-                  <a className="text-green-300 hover:text-green-500 text-4xl">
-                    +
-                  </a>
+                  <Plus className="size-7" />
+                  <span className="text-lg font-semibold">
+                    Create a Program
+                  </span>
                 </Link>
               </div>
             </div>
           </div>
-        </div>
+        </>
       ) : (
         <div className="grid place-items-center p-8 gap-2 min-h-[100dvh]">
           <LoaderCircleIcon className="size-16 stroke-indigo-700 animate-spin" />
