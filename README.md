@@ -103,4 +103,6 @@ Dev server will start at [localhost:3000](http://localhost:3000)
 This project is licensed under the AGPL-3.0 License - see the [LICENSE](LICENSE) file for details.
 
 ## Contributors
-![GitHub Contributors Image](https://contrib.rocks/image?repo=arnav-kr/CertifiCat)
+<a href="https://github.com/arnav-kr/certificat/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=arnav-kr/certificat" />
+</a>
