@@ -8,9 +8,8 @@ import {
   ChevronDown,
   LoaderCircleIcon,
 } from "lucide-react";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useState, Suspense, useRef } from "react";
 import { pdfjs, Document, Page } from "react-pdf";
-// client side query params nextjs 15
 import { useSearchParams } from "next/navigation";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -24,12 +23,8 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
   const [programs, setPrograms] = useState<string[]>([]);
   const userDetails = useRef<{ user_id: string; program: string } | null>(null);
-  const searchParams = useSearchParams();
   const userInputRef = useRef<HTMLInputElement>(null);
   const programSelectRef = useRef<HTMLSelectElement>(null);
-
-  const id = searchParams.get("id");
-  const program = searchParams.get("program");
 
   const fetchCertificate = async (program: string, id: string) => {
     const res = await fetch(`/certificates/${program}/${id}`);
@@ -44,19 +39,23 @@ export default function Home() {
       console.error("Error fetching certificate");
     }
   };
-  useEffect(() => {
-    if (program && id) {
-      userDetails.current = {
-        user_id: id as string,
-        program: program as string,
-      };
-      if (userInputRef.current && programSelectRef.current) {
-        userInputRef.current.value = id;
-        programSelectRef.current.value = program;
+  const PopulateSearchParams = () => {
+    const searchParams = useSearchParams();
+    useEffect(() => {
+      if (!searchParams) return;
+      const id = searchParams.get("id");
+      const program = searchParams.get("program");
+      if (program && id) {
+        userDetails.current = { user_id: id, program };
+        if (userInputRef.current && programSelectRef.current) {
+          userInputRef.current.value = id;
+          programSelectRef.current.value = program;
+        }
+        fetchCertificate(program as string, id as string);
       }
-      fetchCertificate(program as string, id as string);
-    }
-  }, [program, id]);
+    }, [searchParams]);
+    return null;
+  };
 
   useEffect(() => {
     async function fetchPrograms() {
@@ -82,7 +81,8 @@ export default function Home() {
   };
 
   return (
-    <>
+    <Suspense>
+      <PopulateSearchParams />
       <div className="w-full min-h-[100dvh] flex flex-col items-center justify-center py-8">
         <h2 className="text-4xl text-center font-semibold text-neutral-800 dark:text-neutral-200 mb-8 font-dm-serif-display">
           Claim Your Certificate
@@ -185,6 +185,6 @@ export default function Home() {
           </div>
         )}
       </div>
-    </>
+    </Suspense>
   );
 }
