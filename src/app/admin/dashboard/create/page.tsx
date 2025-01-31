@@ -54,17 +54,16 @@ export default function Create() {
           const data = results.data as { [key: string]: unknown }[];
           console.log("CSV data:", data);
           setParsedValues(data as { [key: string]: unknown }[]);
-          setFieldsToImport(
-            Object.keys(data[0]).map((k) => {
-              const sanatized = sanatizeProgramName(k);
-              return {
-                value: sanatized,
-                label: sanatizeProgramName(sanatized),
-              };
-            })
-          );
-          if(!fieldsToImport.some((option) => option.value === "id")) {
-              setTokenInputError("id field is required");
+          const fields = Object.keys(data[0]).map((k) => {
+            const sanatized = sanatizeProgramName(k);
+            return {
+              value: sanatized,
+              label: sanatizeProgramName(sanatized),
+            };
+          });
+          setFieldsToImport(fields);
+          if (!fields.some((option) => option.value === "id")) {
+            setTokenInputError("id field is required");
           }
         },
       });
@@ -72,7 +71,10 @@ export default function Create() {
   };
 
   const handleTokenInputChange = (newValue: MultiValue<Option>) => {
-    if (newValue.length === 0 || !newValue.some((option) => option.value === "id")) {
+    if (
+      newValue.length === 0 ||
+      !newValue.some((option) => option.value === "id")
+    ) {
       setTokenInputError("id field is required");
     } else {
       setTokenInputError(null);
@@ -169,7 +171,10 @@ export default function Create() {
                 htmlFor="csv"
                 className="font-semibold text-sm text-neutral-700 dark:text-neutral-300 mb-1"
               >
-                Participants Data <span className="text-xs text-neutral-500 font-medium">(id field is mandatory)</span>
+                Participants Data{" "}
+                <span className="text-xs text-neutral-500 font-medium">
+                  (id field is mandatory)
+                </span>
               </label>
               <input
                 className="block w-full mb-4 border shadow-sm font-medium bg-neutral-black dark:bg-black dark:placeholder:text-neutral-600 p-2 text-sm text-neutral-600 dark:text-neutral-400 placeholder-neutral-950 dark:border-neutral-800 rounded-md file:bg-indigo-700 file:cursor-pointer file:rounded-md file:px-3 file:py-2 file:mr-2 file:text-white border-neutral-300 file:border-0 cursor-pointer"
