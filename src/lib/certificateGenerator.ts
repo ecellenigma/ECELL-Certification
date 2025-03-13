@@ -33,14 +33,11 @@ export async function generateCertificate(id: string, programSlug: string) {
     }
     const fields = schemas.map(schema => schema.name);
     const template = await constructTemplate(basePdf, schemas);
-    // console.log(template.basePdf);
-    return await generate({
-      template, inputs: fields.map(field => {
-        return {
-          [field]: res.participant[field]
-        }
-      })
+    const inputs: { [key: string]: string } = {};
+    fields.forEach(field => {
+      inputs[field] = res.participant[field];
     });
+    return await generate({ template, inputs: [inputs] });
   }
   catch (e) {
     console.error(e);
