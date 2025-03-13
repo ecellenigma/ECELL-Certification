@@ -1,4 +1,4 @@
-import { doc, setDoc, getDoc, writeBatch, runTransaction, arrayUnion, deleteDoc, arrayRemove, updateDoc, getDocs, collection } from "firebase/firestore";
+import { doc, setDoc, getDoc, query, where, writeBatch, runTransaction, arrayUnion, deleteDoc, arrayRemove, updateDoc, getDocs, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase/clientApp";
 import { convertFirestoreArray, sanatizeProgramName } from "@/lib/helpers";
 import { Participant } from "@/types";
@@ -94,7 +94,26 @@ export async function getParticipantWithSchema(id: string, program: string) {
   return transaction;
 }
 
+export async function getIdFromEmail(email: string, program: string) {
+  try {
+    program = sanatizeProgramName(program);
+  }
+  catch (err) {
+    console.log(err);
+    return false;
+  }
+  const q = query(collection(db, program), where("email", "==", email.toLowerCase()));
+  const querySnapshot = await getDocs(q);
+  if (querySnapshot.empty) {
+    return false;
+  }
+  return querySnapshot.docs[0].id;
+}
+
+
+
 export async function getParticipant(id: string, program: string) {
+  console.log("Getting participant", id, program);
   try {
     program = sanatizeProgramName(program);
   }
@@ -106,7 +125,7 @@ export async function getParticipant(id: string, program: string) {
   if (docSnap.exists()) {
     return docSnap.data();
   } else {
-    console.log("No such document!");
+    return false;
   }
 }
 export async function getParticipants(program: string) {

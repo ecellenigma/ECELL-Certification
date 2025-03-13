@@ -22,12 +22,14 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [programs, setPrograms] = useState<string[]>([]);
-  const userDetails = useRef<{ user_id: string; program: string } | null>(null);
+  const userDetails = useRef<{ email: string; program: string } | null>(null);
   const userInputRef = useRef<HTMLInputElement>(null);
   const programSelectRef = useRef<HTMLSelectElement>(null);
 
-  const fetchCertificate = async (program: string, id: string) => {
-    const res = await fetch(`/certificates/${program}/${id}`);
+  const fetchCertificate = async (program: string, email: string) => {
+    const query = new URLSearchParams();
+    query.set("email", email);
+    const res = await fetch(`/certificates/${program}/certificate.pdf?${query.toString()}`);
     setLoading(false);
     if (res.ok) {
       const blob = await res.blob();
@@ -43,15 +45,15 @@ export default function Home() {
     const searchParams = useSearchParams();
     useEffect(() => {
       if (!searchParams) return;
-      const id = searchParams.get("id");
+      const email = searchParams.get("email");
       const program = searchParams.get("program");
-      if (program && id) {
-        userDetails.current = { user_id: id, program };
+      if (program && email) {
+        userDetails.current = { email, program };
         if (userInputRef.current && programSelectRef.current) {
-          userInputRef.current.value = id;
+          userInputRef.current.value = email;
           programSelectRef.current.value = program;
         }
-        fetchCertificate(program as string, id as string);
+        fetchCertificate(program as string, email as string);
       }
     }, [searchParams]);
     return null;
@@ -70,14 +72,14 @@ export default function Home() {
     setPdf(null);
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
-    const user_id = formData.get("user_id")?.toString().toUpperCase();
+    const email = formData.get("email")?.toString().toLowerCase();
     const program = formData.get("program")?.toString();
     userDetails.current = {
-      user_id: user_id as string,
+      email: email as string,
       program: program as string,
     };
 
-    fetchCertificate(program as string, user_id as string);
+    fetchCertificate(program as string, email as string);
   };
 
   return (
@@ -94,24 +96,24 @@ export default function Home() {
           {error && <Notice type="error" message={error} />}
           <div className="flex flex-col">
             <label
-              htmlFor="user_id"
+              htmlFor="email"
               className="font-semibold text-sm text-neutral-700 dark:text-neutral-300 mb-1"
             >
-              User ID:
+              Email:
             </label>
             <input
-              type="text"
-              pattern="[a-zA-Z0-9]+"
-              id="user_id"
-              name="user_id"
-              placeholder="U1A2B3C4D5"
+              type="email"
+              // pattern="[a-zA-Z0-9]+"
+              id="email"
+              name="email"
+              placeholder="name@example.com"
               minLength={8}
               required
               ref={userInputRef}
               onKeyDown={() => {
                 setError(null);
               }}
-              className="w-full border shadow-sm uppercase font-medium text-neutral-950 dark:text-neutral-50 placeholder:text-neutral-400 dark:placeholder:text-neutral-600 border-neutral-300 dark:border-neutral-800 bg-transparent rounded-md px-4 py-3 text-sm"
+              className="w-full border shadow-sm font-medium text-neutral-950 dark:text-neutral-50 placeholder:text-neutral-400 dark:placeholder:text-neutral-600 border-neutral-300 dark:border-neutral-800 bg-transparent rounded-md px-4 py-3 text-sm"
             />
           </div>
           <div className="flex flex-col">
@@ -175,7 +177,7 @@ export default function Home() {
             <a
               href={pdf}
               download={`${userDetails.current?.program}_${
-                userDetails.current?.user_id || "certificate"
+                userDetails.current?.email || "certificate"
               }.pdf`}
               className="flex items-center justify-center max-w-xs gap-2 px-4 mt-4 py-2 w-full rounded-md shadow-sm bg-indigo-700 hover:shadow-md transition duration-150 ease active:scale-[99%] text-white"
             >

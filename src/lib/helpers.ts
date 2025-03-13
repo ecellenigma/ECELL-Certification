@@ -127,7 +127,7 @@ export const getDefaultTemplate = () =>
         strikethrough: false,
         underline: false,
         required: false,
-        readOnly: true
+        readOnly: false
       }
     ]
   ],
@@ -175,4 +175,9 @@ export function sanatizeProgramName(name: string) {
 // all _ are converted to space and first letter of each word is capitalized
 export function formatProgramName(name: string) {
   return name.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+}
+
+export function generateId() {
+  // use time, random number and random string to generate a unique id to generate a unique id of lentgh 10
+  return (Date.now().toString(36) + Math.random().toString(36).substring(2, 4)).toUpperCase();
 }
