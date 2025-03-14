@@ -125,8 +125,16 @@ function TemplateEditor(props: {
   useEffect(() => {
     if (props.template) {
       template.current = props.template;
+      if (uiRef.current) {
+        buildEditor();
+      }
+      return () => {
+        if (editor.current) {
+          editor.current.destroy();
+        }
+      };
     }
-  }, [props.template, onBaseTemplateChange]);
+  }, [props.template, onBaseTemplateChange, buildEditor]);
 
   useEffect(() => {
     if (props.basePdf && editor.current) {

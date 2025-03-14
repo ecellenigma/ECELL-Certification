@@ -78,14 +78,14 @@ export default function Programs() {
                     <div className="flex flex-col justify-center gap-2 p-1">
                       <Link
                         href={`dashboard/programs/${program}/participants`}
-                        className="w-full px-3 py-2 text-sm font-medium flex justify-center items-center gap-2 rounded-md bg-none border border-neutral-200 hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer transition active:scale-[99%] duration-100 ease"
+                        className="w-full px-3 py-2 text-sm font-medium flex justify-center items-center gap-2 rounded-md bg-none border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer transition active:scale-[99%] duration-100 ease"
                       >
                         <Users className="size-4" />
                         <span>Edit Participants</span>
                       </Link>
                       <Link
                         href={`dashboard/programs/${program}/template`}
-                        className="w-full px-3 py-2 text-sm font-medium flex justify-center items-center gap-2 rounded-md bg-none border border-neutral-200 hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer transition active:scale-[99%] duration-100 ease"
+                        className="w-full px-3 py-2 text-sm font-medium flex justify-center items-center gap-2 rounded-md bg-none border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer transition active:scale-[99%] duration-100 ease"
                       >
                         <LayoutTemplate className="size-4" />
                         <span>Edit Template</span>

@@ -17,9 +17,12 @@ import {
   InfoIcon,
 } from "lucide-react";
 import TokenInput, { Option } from "@/components/TokenInput";
-import { sanatizeProgramName } from "@/lib/helpers";
+import {
+  clientUploadBasePdf,
+  generateId,
+  sanatizeProgramName,
+} from "@/lib/helpers";
 import { MultiValue } from "react-select";
-//import { uploadBasePdf } from "@/lib/firebase/storage";
 
 export default function Create() {
   const { user, authLoading } = useAuth();
@@ -62,8 +65,8 @@ export default function Create() {
             };
           });
           setFieldsToImport(fields);
-          if (!fields.some((option) => option.value === "id")) {
-            setTokenInputError("id field is required");
+          if (!fields.some((option) => option.value === "email")) {
+            setTokenInputError("email field is required");
           }
         },
       });
@@ -73,9 +76,9 @@ export default function Create() {
   const handleTokenInputChange = (newValue: MultiValue<Option>) => {
     if (
       newValue.length === 0 ||
-      !newValue.some((option) => option.value === "id")
+      !newValue.some((option) => option.value === "email")
     ) {
-      setTokenInputError("id field is required");
+      setTokenInputError("email field is required");
     } else {
       setTokenInputError(null);
     }
@@ -90,6 +93,19 @@ export default function Create() {
       // eslint-disable-next-line prefer-const
       let newParticipant: { [key: string]: unknown } = {};
       for (const key of fieldKeys) {
+        if (key === "email") {
+          if (!participant[key]) {
+            console.log("Email field is missing in one of the participants");
+            setIsUploadingCsv(false);
+            return;
+          }
+          newParticipant[key] = participant[key].toString().toLowerCase();
+          // if id doesn't exist, create one
+          if (!participant["id"]) {
+            newParticipant["id"] = generateId();
+          }
+          continue;
+        }
         newParticipant[key] = participant[key];
       }
       return newParticipant;
@@ -120,10 +136,13 @@ export default function Create() {
     }
     console.log("Templates updated");
     setMessage("Schema updated successfully");
-    //if(pdf){
-    //await uploadBasePdf(pdf, name);
-    //console.log(uploadBasePdf(pdf, name));
-    //}
+    if (pdf) {
+      const result = await clientUploadBasePdf(pdf, name);
+      const jsonRes = await result.json();
+      if (jsonRes.success) {
+        setMessage("Base PDF uploaded successfully!");
+      }
+    }
   };
 
   return (
@@ -173,7 +192,7 @@ export default function Create() {
               >
                 Participants Data{" "}
                 <span className="text-xs text-neutral-500 font-medium">
-                  (id field is mandatory)
+                  (email field is mandatory)
                 </span>
               </label>
               <input
