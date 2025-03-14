@@ -43,19 +43,12 @@ Server will start at [localhost:3000](http://localhost:3000)
 ## Usage
 
 ### Pre-requisites
-CertifiCat uses [firebase](https://firebase.google.com/) for authentication, database and storage. You need to create a firebase project with blaze plan and get the firebase config.
+CertifiCat uses [firebase](https://firebase.google.com/) for authentication, database. You need to create a firebase project with blaze plan and get the firebase config. It also uses MongoDB to store the certificates template base PDFs. You need to have a MongoDB instance running.
 
 You can get the firebase config from the firebase console.
 
 #### Project Setup
-Create a `.env.local` file in the root of the project and add the following environment variables:
-```bash
-NEXT_PUBLIC_FIREBASE_API_KEY=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-NEXT_PUBLIC_FIREBASE_APP_ID=
-```
+Create a `.env.local` file in the root of the project and add the required environment variables as listed in [example.env](example.env)
 
 #### Authentication
 enable email/password authentication in firebase console and create a user. This user will be the admin of the application.
