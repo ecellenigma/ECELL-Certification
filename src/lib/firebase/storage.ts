@@ -2,11 +2,8 @@ import { storage } from "@/lib/firebase/clientApp";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 export const uploadBasePdf = async (file: File, programId: string) => {
-
   const storageRef = ref(storage, `programs/${programId}/base.pdf`);
-
   const snapshot = await uploadBytesResumable(storageRef, file);
-
   return getDownloadURL(snapshot.ref);
 
 };

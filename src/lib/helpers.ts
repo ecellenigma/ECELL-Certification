@@ -181,3 +181,14 @@ export function generateId() {
   // use time, random number and random string to generate a unique id to generate a unique id of lentgh 10
   return (Date.now().toString(36) + Math.random().toString(36).substring(2, 4)).toUpperCase();
 }
+
+// client side upload via post request
+export async function clientUploadBasePdf(file: File, programId: string) {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(`/admin/templates/${programId}`, {
+    method: 'POST',
+    body: formData
+  });
+  return res;
+}

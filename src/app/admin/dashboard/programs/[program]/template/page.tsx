@@ -1,7 +1,10 @@
 "use client";
-import React, { useState, ChangeEvent } from "react";
-import { uploadBasePdf } from "@/lib/firebase/storage";
-import { setParticipants, setSchemas } from "@/lib/firebase/firestore";
+import React, { useState, ChangeEvent, useEffect } from "react";
+import {
+  getSchemas,
+  setParticipants,
+  setSchemas,
+} from "@/lib/firebase/firestore";
 import { useParams } from "next/navigation";
 import Papa from "papaparse";
 import { Participant } from "@/types";
@@ -16,6 +19,7 @@ import {
 import Notice from "@/components/Notice";
 import { useAuth } from "@/providers/AuthContext";
 import { signOut } from "@/lib/firebase/auth";
+import { clientUploadBasePdf, readFile } from "@/lib/helpers";
 
 export default function TemplatePage() {
   const { program } = useParams();
@@ -31,9 +35,49 @@ export default function TemplatePage() {
     basePdf: "",
   });
 
+  useEffect(() => {
+    async function fetchCurrentTemplate() {
+      if (program) {
+        const res = await fetch("/admin/templates/" + program);
+        if (res.ok) {
+          const data = await res.blob();
+          const schemas = await getSchemas(program as string);
+          console.log("Schemas:", schemas);
+          console.log(
+            "Base PDF:",
+            await readFile(
+              new File([data], "base.pdf", { type: "application/pdf" }),
+              "dataURL"
+            )
+          );
+          if (schemas) {
+            setTemplate({
+              schemas: [schemas],
+              basePdf: await readFile(
+                new File([data], "base.pdf", { type: "application/pdf" }),
+                "dataURL"
+              ),
+            });
+          }
+        }
+      }
+    }
+    fetchCurrentTemplate();
+  }, [program]);
+
   const handleBasePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setBasePdf(e.target.files[0]);
+      (async () => {
+        if (e.target.files) {
+          console.log("PDF:", e.target.files[0]);
+          const basePdfData = await readFile(e.target.files[0], "dataURL");
+          setTemplate((prevTemplate) => ({
+            ...prevTemplate,
+            basePdf: basePdfData,
+          }));
+        }
+      })();
     }
   };
 
@@ -48,8 +92,10 @@ export default function TemplatePage() {
   const handleBasePdfUpload = async () => {
     if (basePdf) {
       try {
-        const url = await uploadBasePdf(basePdf, program as string);
-        setBasePdfUrl(url);
+        const res = await (
+          await clientUploadBasePdf(basePdf, program as string)
+        ).json();
+        if (res.success) setBasePdfUrl(res.url);
         const basePdfData = await basePdf.arrayBuffer();
         setTemplate((prevTemplate) => ({
           ...prevTemplate,
@@ -118,7 +164,7 @@ export default function TemplatePage() {
             </button>
           </div>
           <div className="text-white p-6 flex flex-col items-center">
-            <h1 className="text-3xl font-bold mb-6">Edit Program</h1>
+            <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100">Edit Program</h1>
             {message && <Notice type="success" message={message} />}
             <div className="bg-gray-900 p-8 rounded-lg shadow-lg w-full max-w-4xl">
               <div className="mb-4">
@@ -182,10 +228,16 @@ export default function TemplatePage() {
                 </div>
               )}
               <div className="mt-6 w-full">
-                <TemplateEditor
-                  template={template}
-                  onSubmit={handleTemplateSave}
-                />
+                {template.basePdf !== "" ? (
+                  <TemplateEditor
+                    template={template}
+                    onSubmit={handleTemplateSave}
+                  />
+                ) : (
+                  <div className="grid place-items-center p-8 gap-2 min-h-[100dvh]">
+                    <LoaderCircleIcon className="size-14 stroke-indigo-600 animate-spin" />
+                  </div>
+                )}
               </div>
             </div>
           </div>

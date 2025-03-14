@@ -17,9 +17,12 @@ import {
   InfoIcon,
 } from "lucide-react";
 import TokenInput, { Option } from "@/components/TokenInput";
-import { generateId, sanatizeProgramName } from "@/lib/helpers";
+import {
+  clientUploadBasePdf,
+  generateId,
+  sanatizeProgramName,
+} from "@/lib/helpers";
 import { MultiValue } from "react-select";
-//import { uploadBasePdf } from "@/lib/firebase/storage";
 
 export default function Create() {
   const { user, authLoading } = useAuth();
@@ -133,10 +136,13 @@ export default function Create() {
     }
     console.log("Templates updated");
     setMessage("Schema updated successfully");
-    //if(pdf){
-    //await uploadBasePdf(pdf, name);
-    //console.log(uploadBasePdf(pdf, name));
-    //}
+    if (pdf) {
+      const result = await clientUploadBasePdf(pdf, name);
+      const jsonRes = await result.json();
+      if (jsonRes.success) {
+        setMessage("Base PDF uploaded successfully!");
+      }
+    }
   };
 
   return (

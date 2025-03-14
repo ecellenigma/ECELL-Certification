@@ -3,10 +3,12 @@ import { generateCertificate } from '@/lib/certificateGenerator';
 import { getIdFromEmail, getParticipant, getPrograms } from '@/lib/firebase/firestore';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string, program: string }> }) {
-  const { program } = await params;
+  let { program } = await params;
   let { id } = await params;
   const searchParams = request.nextUrl.searchParams
   const email = searchParams.get('email');
+
+  program = program.toLowerCase()
 
   if (id == "certificate.pdf" && email) {
     const emailValidity = await validateEmail(email);
@@ -60,20 +62,20 @@ async function validateDetails(id: string, programSlug: string) {
     status: 400,
     body: 'Invalid ID or Program',
   };
-  if (!id.match(/^[a-zA-Z0-9]+$/) || !programSlug.match(/^[a-z0-9_]+$/)) return {
+  if (!id.match(/^[a-zA-Z0-9]+$/) || !programSlug.toLowerCase().match(/^[a-z0-9_]+$/)) return {
     success: false,
     status: 400,
     body: 'Invalid ID or Program',
   };
 
   const programs = await getPrograms();
-  if (!programs.includes(programSlug)) return {
+  if (!programs.includes(programSlug.toLowerCase())) return {
     success: false,
     status: 404,
     body: 'Program not found',
   };
 
-  const participant = await getParticipant(id, programSlug);
+  const participant = await getParticipant(id, programSlug.toLowerCase());
   if (!participant) return {
     success: false,
     status: 404,
