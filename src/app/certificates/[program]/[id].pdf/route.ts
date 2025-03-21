@@ -24,9 +24,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     console.log("Found participant", res, program, email, id);
     id = res;
   }
-  
+
   // if (id.endsWith('.pdf')) id = id.slice(0, -4);
-  id = id.replace('.pdf', '');
+  id = id.replaceAll('.pdf', '');
 
   const validity = await validateDetails(id, program);
   if (!validity.success) {
