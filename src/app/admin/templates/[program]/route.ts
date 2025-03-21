@@ -1,7 +1,7 @@
 export const dynamic = 'force-static'
 import { type NextRequest } from 'next/server'
 import { getPrograms } from '@/lib/firebase/firestore';
-import { connect, getBasePdf, uploadBasePdf } from '@/lib/mongo/client';
+import { getBasePdf, uploadBasePdf } from '@/lib/mongo/client';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ program: string }> }) {
   let { program } = await params;
