@@ -7,10 +7,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   let { id } = await params;
   const searchParams = request.nextUrl.searchParams
   const email = searchParams.get('email');
+  
+  program = program.toLowerCase();
+  id = id.replaceAll('.pdf', '');
 
-  program = program.toLowerCase()
-
-  if (id == "certificate.pdf" && email) {
+  if (id == "certificate" && email) {
     const emailValidity = await validateEmail(email);
     if (!emailValidity.success) {
       return new Response(emailValidity.body, { status: emailValidity.status });
@@ -23,14 +24,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   const validity = await validateDetails(id, program);
-
   if (!validity.success) {
     return new Response(validity.body, { status: validity.status });
   }
 
-  if (id.endsWith('.pdf')) id = id.slice(0, -4);
-
   const pdf = await generateCertificate(id, program);
+  // convert to a format to work with vercel
   return new Response(pdf, {
     headers: {
       'Content-Type': 'application/pdf',

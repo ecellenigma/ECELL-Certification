@@ -11,10 +11,8 @@ export async function getBasePdf(name: string) {
   const storageRef = ref(storage, `basePdfs/${name}`);
   const url = await getDownloadURL(storageRef);
   if(!url) throw new Error("File not found");
-  console.log("Download URL:", url);
   const response = await fetch(url);
   const data = await response.blob();
-  console.log("Downloaded file:", data);
   return data;
 }
 

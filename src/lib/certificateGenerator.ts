@@ -6,8 +6,9 @@ import fs from 'fs';
 import path from "path";
 import { constructTemplate } from './helpers';
 
-export async function generateCertificate(id: string, programSlug: string) {
+const isVercel = process.env.VERCEL == '1';
 
+export async function generateCertificate(id: string, programSlug: string) {
   programSlug = programSlug.toLowerCase();
   // TODO: [SECURITY] use a user for firestore operation as no public access will be allowed in production
   const res = await getParticipantWithSchema(id, programSlug);
@@ -15,27 +16,29 @@ export async function generateCertificate(id: string, programSlug: string) {
     throw new Error('Participant not found');
   }
 
-  let basePdf;
-  console.log(programSlug, fs.existsSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}.pdf`)))
-  const latestVersion = await getBasePdfVersion(programSlug);
+  let basePdf: Buffer | null = null, latestVersion: string | null = null;
   try {
     // format is programSlug-version.pdf
-    if (fs.existsSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`))) {
-      basePdf = new Blob([fs.readFileSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`))], { type: 'application/pdf' });
-      // delete old versions
-      fs.readdirSync(path.join(process.cwd(), `.cache/basePdf`)).forEach(file => {
-        if (file.startsWith(`${programSlug}-`) && file !== `${programSlug}-${latestVersion}.pdf`) {
-          fs.unlinkSync(path.join(process.cwd(), `.cache/basePdf/${file}`));
-        }
-      });
+    if (!isVercel) {
+      latestVersion = await getBasePdfVersion(programSlug);
+      if (fs.existsSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`))) {
+        basePdf = fs.readFileSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`));
+        // delete old versions
+        fs.readdirSync(path.join(process.cwd(), `.cache/basePdf`)).forEach(file => {
+          if (file.startsWith(`${programSlug}-`) && file !== `${programSlug}-${latestVersion}.pdf`) {
+            fs.unlinkSync(path.join(process.cwd(), `.cache/basePdf/${file}`));
+          }
+        });
+      }
     }
-    // else fetch new
-    else {
-      basePdf = await getBasePdf(programSlug);
-      console.log("Base PDF:", basePdf);
-      fs.writeFileSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`), basePdf);
+    if (!basePdf) {
+      const pdf = await getBasePdf(programSlug);
+      if (!pdf) {
+        throw new Error('Base PDF not found');
+      }
+      basePdf = Buffer.from(pdf);
+      if (!isVercel && latestVersion) fs.writeFileSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`), basePdf);
     }
-
     const schemas = await getSchemas(programSlug);
     if (!schemas) {
       throw new Error('No schemas found');

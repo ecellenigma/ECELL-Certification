@@ -55,7 +55,7 @@ export default function Create() {
           sanatizeProgramName(header.trim().toLowerCase()),
         complete: async (results) => {
           const data = results.data as { [key: string]: unknown }[];
-          console.log("CSV data:", data);
+          // console.log("CSV data:", data);
           setParsedValues(data as { [key: string]: unknown }[]);
           const fields = Object.keys(data[0]).map((k) => {
             const sanatized = sanatizeProgramName(k);
@@ -110,7 +110,7 @@ export default function Create() {
       }
       return newParticipant;
     });
-    console.log(dataToUpload, name);
+    // console.log(dataToUpload, name);
 
     const success = await setParticipants(
       name,
@@ -126,7 +126,7 @@ export default function Create() {
   };
 
   const onSubmit = async (template: Template) => {
-    console.log(template.schemas);
+    // console.log(template.schemas);
     setTemplate(template);
     const schemas = Object.assign({}, template.schemas[0]);
     const success = await setSchemas(name, schemas);

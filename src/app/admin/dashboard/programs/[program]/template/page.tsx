@@ -42,14 +42,7 @@ export default function TemplatePage() {
         if (res.ok) {
           const data = await res.blob();
           const schemas = await getSchemas(program as string);
-          console.log("Schemas:", schemas);
-          console.log(
-            "Base PDF:",
-            await readFile(
-              new File([data], "base.pdf", { type: "application/pdf" }),
-              "dataURL"
-            )
-          );
+          // console.log("Schemas:", schemas);
           if (schemas) {
             setTemplate({
               schemas: [schemas],
@@ -70,7 +63,6 @@ export default function TemplatePage() {
       setBasePdf(e.target.files[0]);
       (async () => {
         if (e.target.files) {
-          console.log("PDF:", e.target.files[0]);
           const basePdfData = await readFile(e.target.files[0], "dataURL");
           setTemplate((prevTemplate) => ({
             ...prevTemplate,
@@ -120,7 +112,7 @@ export default function TemplatePage() {
       skipEmptyLines: true,
       transformHeader: (header) => header.trim().toLowerCase(),
       complete: async (results) => {
-        console.log("CSV data:", results.data);
+        // console.log("CSV data:", results.data);
         const success = await setParticipants(
           program as string,
           results.data as Participant[]

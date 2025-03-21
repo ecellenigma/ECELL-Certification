@@ -22,7 +22,6 @@ import { Schema } from "@pdfme/common";
 export async function getPrograms() {
   const docSnap = await getDoc(doc(db, "programs_list", "programs"));
   if (docSnap.exists()) {
-    console.log(docSnap.data());
     return convertFirestoreArray(docSnap.data().value) as string[];
   }
   else return [];
