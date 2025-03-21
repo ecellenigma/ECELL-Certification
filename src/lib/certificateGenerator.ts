@@ -6,8 +6,9 @@ import fs from 'fs';
 import path from "path";
 import { constructTemplate } from './helpers';
 
-export async function generateCertificate(id: string, programSlug: string) {
+const isVercel = process.env.VERCEL == '1';
 
+export async function generateCertificate(id: string, programSlug: string) {
   programSlug = programSlug.toLowerCase();
   // TODO: [SECURITY] use a user for firestore operation as no public access will be allowed in production
   const res = await getParticipantWithSchema(id, programSlug);
@@ -20,7 +21,7 @@ export async function generateCertificate(id: string, programSlug: string) {
   const latestVersion = await getBasePdfVersion(programSlug);
   try {
     // format is programSlug-version.pdf
-    if (fs.existsSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`))) {
+    if (!isVercel && fs.existsSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`))) {
       basePdf = new Blob([fs.readFileSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`))], { type: 'application/pdf' });
       // delete old versions
       fs.readdirSync(path.join(process.cwd(), `.cache/basePdf`)).forEach(file => {
@@ -29,13 +30,10 @@ export async function generateCertificate(id: string, programSlug: string) {
         }
       });
     }
-    // else fetch new
-    else {
+    if (!basePdf) {
       basePdf = await getBasePdf(programSlug);
-      console.log("Base PDF:", basePdf);
-      fs.writeFileSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`), basePdf);
+      if (!isVercel) fs.writeFileSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`), basePdf);
     }
-
     const schemas = await getSchemas(programSlug);
     if (!schemas) {
       throw new Error('No schemas found');
