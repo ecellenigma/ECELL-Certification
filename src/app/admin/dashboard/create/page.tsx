@@ -20,7 +20,7 @@ import TokenInput, { Option } from "@/components/TokenInput";
 import {
   clientUploadBasePdf,
   generateId,
-  sanatizeProgramName,
+  sanitizerogramName,
 } from "@/lib/helpers";
 import { MultiValue } from "react-select";
 
@@ -52,16 +52,16 @@ export default function Create() {
         header: true,
         skipEmptyLines: true,
         transformHeader: (header) =>
-          sanatizeProgramName(header.trim().toLowerCase()),
+          sanitizerogramName(header.trim().toLowerCase()),
         complete: async (results) => {
           const data = results.data as { [key: string]: unknown }[];
           // console.log("CSV data:", data);
           setParsedValues(data as { [key: string]: unknown }[]);
           const fields = Object.keys(data[0]).map((k) => {
-            const sanatized = sanatizeProgramName(k);
+            const sanatized = sanitizerogramName(k);
             return {
               value: sanatized,
-              label: sanatizeProgramName(sanatized),
+              label: sanitizerogramName(sanatized),
             };
           });
           setFieldsToImport(fields);
@@ -214,10 +214,10 @@ export default function Create() {
                 </label>
                 <TokenInput
                   options={Object.keys(parsedValues[0]).map((k) => {
-                    const sanatized = sanatizeProgramName(k);
+                    const sanatized = sanitizerogramName(k);
                     return {
                       value: sanatized,
-                      label: sanatizeProgramName(sanatized),
+                      label: sanitizerogramName(sanatized),
                     };
                   })}
                   value={fieldsToImport}

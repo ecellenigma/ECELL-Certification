@@ -1,6 +1,6 @@
 import { doc, setDoc, getDoc, query, where, writeBatch, runTransaction, arrayUnion, deleteDoc, arrayRemove, updateDoc, getDocs, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase/clientApp";
-import { convertFirestoreArray, sanatizeProgramName } from "@/lib/helpers";
+import { convertFirestoreArray, deleteCollection, sanitizerogramName } from "@/lib/helpers";
 import { Participant } from "@/types";
 import { Schema } from "@pdfme/common";
 // firestore structure
@@ -41,7 +41,7 @@ export async function addParticipant(program: string, participant: Participant) 
 
 export async function getSchemas(program: string) {
   try {
-    program = sanatizeProgramName(program);
+    program = sanitizerogramName(program);
   }
   catch (err) {
     console.log(err);
@@ -57,7 +57,7 @@ export async function getSchemas(program: string) {
 
 export async function setSchemas(program: string, schemas: Schema[]) {
   try {
-    program = sanatizeProgramName(program);
+    program = sanitizerogramName(program);
   }
   catch (err) {
     console.log(err);
@@ -75,7 +75,7 @@ export async function setSchemas(program: string, schemas: Schema[]) {
 
 export async function getParticipantWithSchema(id: string, program: string) {
   try {
-    program = sanatizeProgramName(program);
+    program = sanitizerogramName(program);
   }
   catch (err) {
     console.log(err);
@@ -95,7 +95,7 @@ export async function getParticipantWithSchema(id: string, program: string) {
 
 export async function getIdFromEmail(email: string, program: string) {
   try {
-    program = sanatizeProgramName(program);
+    program = sanitizerogramName(program);
   }
   catch (err) {
     console.log(err);
@@ -114,7 +114,7 @@ export async function getIdFromEmail(email: string, program: string) {
 export async function getParticipant(id: string, program: string) {
   console.log("Getting participant", id, program);
   try {
-    program = sanatizeProgramName(program);
+    program = sanitizerogramName(program);
   }
   catch (err) {
     console.log(err);
@@ -129,11 +129,11 @@ export async function getParticipant(id: string, program: string) {
 }
 export async function getParticipants(program: string) {
 
-  try{
-    const querySnapshot = await getDocs(collection(db,`${program}`));
+  try {
+    const querySnapshot = await getDocs(collection(db, `${program}`));
     return querySnapshot.docs.map(doc => doc.data() as Participant);
   }
-  catch(err){
+  catch (err) {
     console.log(err);
     return [];
   }
@@ -146,8 +146,8 @@ export async function deleteProgram(program: string) {
     await updateDoc(programRef, {
       value: arrayRemove(program)
     });
-    await deleteDoc(doc(db, `${program}_schemas`));
-    await deleteDoc(doc(db, `${program}`));
+    await deleteCollection(db, collection(db, `${program}_schemas`));
+    await deleteCollection(db, collection(db, `${program}`));
     console.log("Program deleted from Firestore!");
     return true;
   } catch (err) {
@@ -183,7 +183,7 @@ export async function deleteParticipant(program: string, participantId: string) 
 
 export async function setParticipants(program: string, participants: Participant[]) {
   try {
-    program = sanatizeProgramName(program);
+    program = sanitizerogramName(program);
   }
   catch (err) {
     console.log(err);
@@ -209,7 +209,7 @@ export async function setParticipants(program: string, participants: Participant
     batch.set(doc(db, "programs_list", "programs"), { value: arrayUnion(program) });
   }
   try {
-    batch.commit();
+    await batch.commit();
     console.log("Participants uploaded to Firestore!");
     return true;
   }
