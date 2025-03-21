@@ -1,6 +1,6 @@
 import { Template, Font, getDefaultFont, Schema } from '@pdfme/common';
 import { text } from '@pdfme/schemas';
-import { DocumentData } from 'firebase/firestore';
+import { CollectionReference, DocumentData, Firestore, query as firestoreQuery, orderBy, limit, Query, getDocs, writeBatch } from 'firebase/firestore';
 
 export const getFontsData = (): Font => {
   return {
@@ -162,7 +162,7 @@ export async function constructTemplate(basePdf: Buffer, schemas: Schema[]) {
 // function to get the program name into the correct format
 // only a-z and 0-9 are allowed, rest all are converted to _ and repeated _ are reduced to single _
 // and it can't be program_list nor end with _schemas
-export function sanatizeProgramName(name: string) {
+export function sanitizerogramName(name: string) {
   const res = name.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/_schemas$/, 'schemas');
   if (res === 'programs_list') {
     throw new Error('Invalid program name');
@@ -190,4 +190,36 @@ export async function clientUploadBasePdf(file: File, programId: string) {
     body: formData
   });
   return res;
+}
+
+export async function deleteCollection(db: Firestore, collectionRef: CollectionReference<DocumentData, DocumentData>, batchSize: number = 50) {
+  const query = firestoreQuery(collectionRef, orderBy('__name__'), limit(batchSize));
+
+  return new Promise((resolve, reject) => {
+    deleteQueryBatch(db, query, resolve).catch(reject);
+  });
+}
+
+async function deleteQueryBatch(db: Firestore, query: Query, resolve: (value?: unknown) => void) {
+  const snapshot = await getDocs(query);
+
+  const batchSize = snapshot.size;
+  if (batchSize === 0) {
+    // When there are no documents left, we are done
+    resolve();
+    return;
+  }
+
+  // Delete documents in a batch
+  const batch = writeBatch(db);
+  snapshot.docs.forEach((doc: DocumentData) => {
+    batch.delete(doc.ref);
+  });
+  await batch.commit();
+
+  // Recurse on the next process tick, to avoid
+  // exploding the stack.
+  process.nextTick(() => {
+    deleteQueryBatch(db, query, resolve);
+  });
 }
