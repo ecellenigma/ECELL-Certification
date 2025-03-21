@@ -12,7 +12,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   program = program.toLowerCase()
 
-  if (id == "certificate.pdf" && email) {
+  id = id.replaceAll('.pdf', '');
+
+  if (id == "certificate" && email) {
     const emailValidity = await validateEmail(email);
     if (!emailValidity.success) {
       return new Response(emailValidity.body, { status: emailValidity.status });
@@ -24,9 +26,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     console.log("Found participant", res, program, email, id);
     id = res;
   }
-
-  // if (id.endsWith('.pdf')) id = id.slice(0, -4);
-  id = id.replaceAll('.pdf', '');
 
   const validity = await validateDetails(id, program);
   if (!validity.success) {
