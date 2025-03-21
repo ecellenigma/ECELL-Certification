@@ -57,6 +57,7 @@ async function validateEmail(email: string) {
 }
 
 async function validateDetails(id: string, programSlug: string) {
+  console.log("Validating details for certificate", id, programSlug);
   if (!id || !programSlug) return {
     success: false,
     status: 400,
