@@ -24,12 +24,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     console.log("Found participant", res, program, email, id);
     id = res;
   }
-
-  const validity = await validateDetails(id, program);
-
+  
   // if (id.endsWith('.pdf')) id = id.slice(0, -4);
   id = id.replace('.pdf', '');
 
+  const validity = await validateDetails(id, program);
   if (!validity.success) {
     return new Response(validity.body, { status: validity.status });
   }
