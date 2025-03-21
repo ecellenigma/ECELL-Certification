@@ -33,6 +33,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   const pdf = await generateCertificate(id, program);
+  // convert to a format to work with vercel
+  console.log("pdf details", typeof pdf, pdf);
   return new Response(pdf, {
     headers: {
       'Content-Type': 'application/pdf',
