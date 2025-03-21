@@ -8,6 +8,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const searchParams = request.nextUrl.searchParams
   const email = searchParams.get('email');
 
+  console.log("Generating certificate for", id, program, email);
+
   program = program.toLowerCase()
 
   if (id == "certificate.pdf" && email) {
@@ -19,6 +21,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     if (!res) {
       return new Response('Participant not found', { status: 404 });
     }
+    console.log("Found participant", res, program, email, id);
     id = res;
   }
 
