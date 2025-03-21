@@ -1,7 +1,7 @@
 
 import { generate } from '@pdfme/generator';
 import { getParticipantWithSchema, getSchemas } from './firebase/firestore';
-import { getBasePdf, getBasePdfVersion } from '@/lib/mongo/client';
+import { getBasePdf, getBasePdfVersion, connect } from '@/lib/mongo/client';
 import fs from 'fs';
 import path from "path";
 import { constructTemplate } from './helpers';

@@ -13,7 +13,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   if (!validity.success) {
     return new Response(validity.body, { status: validity.status });
   }
-  await connect();
   const pdf = await getBasePdf(program);
   if (!pdf) return new Response('File not found', { status: 404 });
   return new Response(pdf, {
@@ -42,7 +41,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return new Response(validity.body, { status: validity.status });
   }
 
-  await connect();
   const res = await uploadBasePdf(new File([file], `${program}.pdf`, {
     type: 'application/pdf',
   }), program);
