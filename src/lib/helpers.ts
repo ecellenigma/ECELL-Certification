@@ -147,14 +147,13 @@ export const convertFirestoreArray = (data: DocumentData) => {
   return result;
 };
 
-export async function toDataUrl(blob: Blob) {
-  const buffer = Buffer.from(await blob.arrayBuffer());
-  return "data:" + blob.type + ";base64," + buffer.toString("base64");
+export async function toDataUrl(buffer: Buffer, type: string) {
+  return "data:" + type + ";base64," + buffer.toString("base64");
 }
 
-export async function constructTemplate(basePdf: Blob, schemas: Schema[]) {
+export async function constructTemplate(basePdf: Buffer, schemas: Schema[]) {
   return {
-    basePdf: await toDataUrl(basePdf),
+    basePdf: await toDataUrl(basePdf, "application/pdf"),
     schemas: [schemas],
     pdfmeVersion: "5.2.16",
   };

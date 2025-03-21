@@ -7,11 +7,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   let { id } = await params;
   const searchParams = request.nextUrl.searchParams
   const email = searchParams.get('email');
-
-  console.log("Generating certificate for", id, program, email);
-
-  program = program.toLowerCase()
-
+  
+  program = program.toLowerCase();
   id = id.replaceAll('.pdf', '');
 
   if (id == "certificate" && email) {
@@ -23,7 +20,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     if (!res) {
       return new Response('Participant not found', { status: 404 });
     }
-    console.log("Found participant", res, program, email, id);
     id = res;
   }
 
@@ -34,7 +30,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   const pdf = await generateCertificate(id, program);
   // convert to a format to work with vercel
-  console.log("pdf details", typeof pdf, pdf);
   return new Response(pdf, {
     headers: {
       'Content-Type': 'application/pdf',
@@ -61,7 +56,6 @@ async function validateEmail(email: string) {
 }
 
 async function validateDetails(id: string, programSlug: string) {
-  console.log("Validating details for certificate", id, programSlug);
   if (!id || !programSlug) return {
     success: false,
     status: 400,

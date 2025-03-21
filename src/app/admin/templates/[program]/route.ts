@@ -44,7 +44,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const res = await uploadBasePdf(new File([file], `${program}.pdf`, {
     type: 'application/pdf',
   }), program);
-  console.log("Upload response:", res);
   if (!res) return new Response('Error uploading file', { status: 500 });
   return new Response(JSON.stringify({
     success: true,

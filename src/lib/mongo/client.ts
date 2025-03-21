@@ -23,14 +23,14 @@ export async function uploadBasePdf(file: File, programId: string) {
   return res;
 };
 
-export async function getBasePdf(name: string) {
+export async function getBasePdf(name: string): Promise<Buffer | null> {
   await connect();
   const template = await Template.findOne({ program: name });
   if (!template) return null;
-  return template.file;
+  return template.file?.buffer as Buffer || null;
 }
 
-export async function getBasePdfVersion(name: string) {
+export async function getBasePdfVersion(name: string): Promise<string | null> {
   await connect();
   const template
     = await Template.findOne({ program: name }).select('version');

@@ -16,23 +16,27 @@ export async function generateCertificate(id: string, programSlug: string) {
     throw new Error('Participant not found');
   }
 
-  let basePdf;
-  console.log(programSlug, fs.existsSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}.pdf`)))
-  const latestVersion = await getBasePdfVersion(programSlug);
+  let basePdf: Buffer | null = null, latestVersion: string | null = null;
   try {
     // format is programSlug-version.pdf
-    if (!isVercel && fs.existsSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`))) {
-      basePdf = new Blob([fs.readFileSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`))], { type: 'application/pdf' });
-      // delete old versions
-      fs.readdirSync(path.join(process.cwd(), `.cache/basePdf`)).forEach(file => {
-        if (file.startsWith(`${programSlug}-`) && file !== `${programSlug}-${latestVersion}.pdf`) {
-          fs.unlinkSync(path.join(process.cwd(), `.cache/basePdf/${file}`));
-        }
-      });
+    if (!isVercel) {
+      latestVersion = await getBasePdfVersion(programSlug);
+      if (fs.existsSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`))) {
+        basePdf = fs.readFileSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`));
+        // delete old versions
+        fs.readdirSync(path.join(process.cwd(), `.cache/basePdf`)).forEach(file => {
+          if (file.startsWith(`${programSlug}-`) && file !== `${programSlug}-${latestVersion}.pdf`) {
+            fs.unlinkSync(path.join(process.cwd(), `.cache/basePdf/${file}`));
+          }
+        });
+      }
     }
     if (!basePdf) {
       basePdf = await getBasePdf(programSlug);
-      if (!isVercel) fs.writeFileSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`), basePdf);
+      if (!basePdf) {
+        throw new Error('Base PDF not found');
+      }
+      if (!isVercel && latestVersion) fs.writeFileSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`), basePdf);
     }
     const schemas = await getSchemas(programSlug);
     if (!schemas) {
