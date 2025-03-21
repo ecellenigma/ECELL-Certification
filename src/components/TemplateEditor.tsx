@@ -28,7 +28,6 @@ function TemplateEditor(props: {
 
   if (props.fields) {
     inputs = props.fields.map((f) => defaultField(f.name, f.x, f.y));
-    console.log(inputs);
   }
 
   if (props.template) {
