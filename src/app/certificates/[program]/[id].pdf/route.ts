@@ -27,11 +27,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   const validity = await validateDetails(id, program);
 
+  // if (id.endsWith('.pdf')) id = id.slice(0, -4);
+  id = id.replace('.pdf', '');
+
   if (!validity.success) {
     return new Response(validity.body, { status: validity.status });
   }
-
-  if (id.endsWith('.pdf')) id = id.slice(0, -4);
 
   const pdf = await generateCertificate(id, program);
   return new Response(pdf, {
