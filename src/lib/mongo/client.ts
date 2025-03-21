@@ -23,11 +23,11 @@ export async function uploadBasePdf(file: File, programId: string) {
   return res;
 };
 
-export async function getBasePdf(name: string): Promise<Buffer | null> {
+export async function getBasePdf(name: string): Promise<ArrayBuffer | null> {
   await connect();
   const template = await Template.findOne({ program: name });
   if (!template) return null;
-  return template.file?.buffer as Buffer || null;
+  return template.file?.buffer as ArrayBuffer || null;
 }
 
 export async function getBasePdfVersion(name: string): Promise<string | null> {

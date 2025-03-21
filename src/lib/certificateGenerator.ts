@@ -32,10 +32,11 @@ export async function generateCertificate(id: string, programSlug: string) {
       }
     }
     if (!basePdf) {
-      basePdf = await getBasePdf(programSlug);
-      if (!basePdf) {
+      const pdf = await getBasePdf(programSlug);
+      if (!pdf) {
         throw new Error('Base PDF not found');
       }
+      basePdf = Buffer.from(pdf);
       if (!isVercel && latestVersion) fs.writeFileSync(path.join(process.cwd(), `.cache/basePdf/${programSlug}-${latestVersion}.pdf`), basePdf);
     }
     const schemas = await getSchemas(programSlug);
