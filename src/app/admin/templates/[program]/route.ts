@@ -1,4 +1,3 @@
-export const dynamic = 'force-static'
 import { type NextRequest } from 'next/server'
 import { getPrograms } from '@/lib/firebase/firestore';
 import { getBasePdf, uploadBasePdf } from '@/lib/mongo/client';
