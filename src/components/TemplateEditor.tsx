@@ -101,14 +101,16 @@ function TemplateEditor(props: {
   //   }
   // }, [props.onSubmit]);
 
+  const { onSubmit } = props;
+
   const onFinalize = useCallback(() => {
     if (editor.current) {
       const template = editor.current.getTemplate();
-      if (props.onSubmit) {
-        props.onSubmit(template);
+      if (onSubmit) {
+        onSubmit(template);
       }
     }
-  }, [props.onSubmit]);
+  }, [onSubmit]);
 
   useEffect(() => {
     if (uiRef.current) {

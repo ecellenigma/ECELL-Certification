@@ -36,8 +36,8 @@ export default function Home() {
       const url = URL.createObjectURL(blob);
       setPdf(url);
     } else {
-      const message = await res.text();
-      setError(message);
+      const json = await res.json();
+      setError(json.message);
       console.error("Error fetching certificate");
     }
   };
@@ -86,7 +86,7 @@ export default function Home() {
     <Suspense>
       <PopulateSearchParams />
       <div className="w-full min-h-[100dvh] flex flex-col items-center justify-center py-8">
-        <h2 className="text-4xl text-center font-semibold text-neutral-800 dark:text-neutral-200 mb-8 font-dm-serif-display">
+        <h2 className="text-4xl text-center font-semibold text-text-heading dark:text-text-heading-dark mb-8 font-dm-serif-display">
           Claim Your Certificate
         </h2>
         <form
@@ -97,7 +97,7 @@ export default function Home() {
           <div className="flex flex-col">
             <label
               htmlFor="email"
-              className="font-semibold text-sm text-neutral-700 dark:text-neutral-300 mb-1"
+              className="font-semibold text-sm text-text-secondary dark:text-text-secondary-dark mb-1"
             >
               Email:
             </label>
@@ -113,13 +113,13 @@ export default function Home() {
               onKeyDown={() => {
                 setError(null);
               }}
-              className="w-full border shadow-sm font-medium text-neutral-950 dark:text-neutral-50 placeholder:text-neutral-400 dark:placeholder:text-neutral-600 border-neutral-300 dark:border-neutral-800 bg-transparent rounded-md px-4 py-3 text-sm"
+              className="w-full border shadow-sm font-medium text-text dark:text-text-dark placeholder:text-text-placeholder dark:placeholder:text-text-placeholder-dark border-border dark:border-border-dark bg-transparent rounded-md px-4 py-3 text-sm"
             />
           </div>
           <div className="flex flex-col">
             <label
               htmlFor="program"
-              className="font-semibold text-sm text-neutral-700 dark:text-neutral-300 mb-1"
+              className="font-semibold text-sm text-text-secondary dark:text-text-secondary-dark mb-1"
             >
               Program:
             </label>
@@ -132,24 +132,24 @@ export default function Home() {
                 onChange={() => {
                   setError(null);
                 }}
-                className="w-full appearance-none border shadow-sm font-medium bg-transparent text-neutral-950 dark:text-neutral-50 border-neutral-300 dark:border-neutral-800 rounded-md px-4 py-3 text-sm"
+                className="w-full appearance-none border shadow-sm font-medium bg-transparent text-text dark:text-text-dark border-border dark:border-border-dark rounded-md px-4 py-3 text-sm"
               >
                 {programs.map((program) => (
                   <option
                     key={program}
                     value={program}
-                    className="bg-neutral-50 text-neutral-950 dark:bg-neutral-950 dark:text-neutral-50"
+                    className="bg-background text-text dark:bg-background-dark dark:text-text-dark"
                   >
                     {formatProgramName(program)}
                   </option>
                 ))}
               </select>
-              <ChevronDown className="size-5 stroke-neutral-700 dark:stroke-neutral-300 absolute top-3.5 right-3.5" />
+              <ChevronDown className="size-5 stroke-text-secondary dark:stroke-text-secondary-dark absolute top-3.5 right-3.5" />
             </div>
           </div>
           <button
             type="submit"
-            className="flex items-center justify-center gap-2 px-4 py-2 w-full rounded-md shadow-sm bg-indigo-700 hover:shadow-md transition duration-150 ease active:scale-[99%] text-white"
+            className="flex items-center justify-center gap-2 px-4 py-2 w-full rounded-md shadow-sm bg-primary dark:bg-primary-dark text-on-primary dark:text-on-primary-dark hover:shadow-md transition duration-150 ease active:scale-[99%]"
           >
             {loading ? (
               <LoaderCircleIcon className="size-5 my-0.5 animate-spin" />
@@ -179,7 +179,7 @@ export default function Home() {
               download={`${userDetails.current?.program}_${
                 userDetails.current?.email || "certificate"
               }.pdf`}
-              className="flex items-center justify-center max-w-xs gap-2 px-4 mt-4 py-2 w-full rounded-md shadow-sm bg-indigo-700 hover:shadow-md transition duration-150 ease active:scale-[99%] text-white"
+              className="flex items-center justify-center max-w-xs gap-2 px-4 mt-4 py-2 w-full rounded-md shadow-sm bg-primary dark:bg-primary-dark text-on-primary dark:text-on-primary-dark hover:shadow-md transition duration-150 ease active:scale-[99%]"
             >
               <span>Download</span>
               <ArrowDown className="size-5" />

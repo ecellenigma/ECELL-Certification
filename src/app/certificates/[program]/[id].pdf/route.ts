@@ -18,7 +18,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
     const res = await getIdFromEmail(email, program);
     if (!res) {
-      return new Response('Participant not found', { status: 404 });
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Participant not found',
+      }), { status: 404 });
     }
     id = res;
   }
@@ -41,12 +44,18 @@ async function validateEmail(email: string) {
   if (!email) return {
     success: false,
     status: 400,
-    body: 'Invalid Email',
+    body: JSON.stringify({
+      success: false,
+      message: 'Email not provided',
+    }),
   };
   if (!email.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)) return {
     success: false,
     status: 400,
-    body: 'Invalid Email',
+    body: JSON.stringify({
+      success: false,
+      message: 'Invalid Email',
+    }),
   };
   return {
     success: true,
@@ -59,26 +68,38 @@ async function validateDetails(id: string, programSlug: string) {
   if (!id || !programSlug) return {
     success: false,
     status: 400,
-    body: 'Invalid ID or Program',
+    body: JSON.stringify({
+      success: false,
+      message: 'ID or Program not provided',
+    }),
   };
   if (!id.match(/^[a-zA-Z0-9]+$/) || !programSlug.toLowerCase().match(/^[a-z0-9_]+$/)) return {
     success: false,
     status: 400,
-    body: 'Invalid ID or Program',
+    body: JSON.stringify({
+      success: false,
+      message: 'Invalid ID or Program',
+    }),
   };
 
   const programs = await getPrograms();
   if (!programs.includes(programSlug.toLowerCase())) return {
     success: false,
     status: 404,
-    body: 'Program not found',
+    body: JSON.stringify({
+      success: false,
+      message: 'Program not found',
+    }),
   };
 
   const participant = await getParticipant(id, programSlug.toLowerCase());
   if (!participant) return {
     success: false,
     status: 404,
-    body: 'Participant not found',
+    body: JSON.stringify({
+      success: false,
+      message: 'Participant not found',
+    }),
   }
 
   return {

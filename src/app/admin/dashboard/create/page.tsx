@@ -281,12 +281,14 @@ export default function Create() {
                 fields={(() => {
                   console.log(fieldsToImport);
                   return fieldsToImport
-                    ? fieldsToImport.map((option, i) => {
-                        return {
-                          name: option.value,
-                          y: i * 18,
-                        };
-                      })
+                    ? fieldsToImport
+                        .filter((f) => f.value !== "id")
+                        .map((option, i) => {
+                          return {
+                            name: option.value,
+                            y: i * 18,
+                          };
+                        })
                     : [{ name: "name", y: 0 }];
                 })()}
               />

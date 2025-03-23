@@ -14,7 +14,8 @@ export async function uploadBasePdf(file: File, programId: string) {
   await connect();
   const fileBuffer = Buffer.from(await file.arrayBuffer());
   // get only the version number from the programId from db
-  const latestRes = await Template.findOne({ program: programId }).select('version') || { version: 0 };
+  const latestRes = (await Template.findOne({ program: programId }).select('version')) || { version: 0 };
+  console.log('Latest version:', latestRes);
   const res = await Template.findOneAndUpdate(
     { program: programId },
     { file: fileBuffer, version: latestRes.version + 1 },
@@ -22,6 +23,12 @@ export async function uploadBasePdf(file: File, programId: string) {
   );
   return res;
 };
+
+export async function deleteBasePdf(name: string) {
+  await connect();
+  const res = await Template.findOneAndDelete({ program: name });
+  return res;
+}
 
 export async function getBasePdf(name: string): Promise<ArrayBuffer | null> {
   await connect();

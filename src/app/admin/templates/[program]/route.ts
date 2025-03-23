@@ -1,6 +1,6 @@
 import { type NextRequest } from 'next/server'
 import { getPrograms } from '@/lib/firebase/firestore';
-import { getBasePdf, uploadBasePdf } from '@/lib/mongo/client';
+import { deleteBasePdf, getBasePdf, uploadBasePdf } from '@/lib/mongo/client';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ program: string }> }) {
   let { program } = await params;
@@ -13,7 +13,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return new Response(validity.body, { status: validity.status });
   }
   const pdf = await getBasePdf(program);
-  if (!pdf) return new Response('File not found', { status: 404 });
+  if (!pdf) return new Response(JSON.stringify({
+    success: false,
+    message: 'File not found',
+  }), { status: 404 });
+
   return new Response(pdf, {
     headers: {
       'Content-Type': 'application/pdf',
@@ -28,9 +32,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const body = Object.fromEntries(formData);
   const file = (body.file as Blob) || null;
 
-  if (!file) return new Response('No file in request', { status: 400 });
+  if (!file) return new Response(JSON.stringify({
+    success: false,
+    message: 'No file in request',
+  }), { status: 400 });
 
-  if (!file.type.match('application/pdf')) return new Response('Invalid file type', { status: 400 });
+  if (!file.type.match('application/pdf')) return new Response(JSON.stringify({
+    success: false,
+    message: 'File is not a pdf',
+  }), { status: 400 });
 
   const validity = await validateDetails(program);
 
@@ -43,10 +53,39 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const res = await uploadBasePdf(new File([file], `${program}.pdf`, {
     type: 'application/pdf',
   }), program);
-  if (!res) return new Response('Error uploading file', { status: 500 });
+  console.log(res);
+  if (!res) return new Response(JSON.stringify({
+    success: false,
+    message: 'Error uploading file',
+  }), { status: 500 });
   return new Response(JSON.stringify({
     success: true,
     url: `/admin/templates/${program}`,
+  }), {
+    status: 200,
+  });
+}
+
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ program: string }> }) {
+  let { program } = await params;
+  const validity = await validateDetails(program);
+  program = program.toLowerCase();
+  if (!validity.success) {
+    return new Response(validity.body, { status: validity.status });
+  }
+  const res = await deleteBasePdf(program);
+  if (!res) return new Response(JSON.stringify({
+    success: false,
+    message: 'Error deleting file',
+  }), { status: 500 });
+  console.log(res);
+  // if (!res.deletedCount) return new Response(JSON.stringify({
+  //   success: false,
+  //   message: 'File not found',
+  // }), { status: 404 });
+  return new Response(JSON.stringify({
+    success: true,
+    message: 'File deleted successfully',
   }), {
     status: 200,
   });
@@ -56,14 +95,20 @@ async function validateDetails(programSlug: string) {
   if (!programSlug.toLowerCase().match(/^[a-z0-9_]+$/)) return {
     success: false,
     status: 400,
-    body: 'Invalid ID or Program',
+    body: JSON.stringify({
+      success: false,
+      message: 'Invalid ID or Program',
+    }),
   };
 
   const programs = await getPrograms();
   if (!programs.includes(programSlug.toLowerCase())) return {
     success: false,
     status: 404,
-    body: 'Program not found',
+    body: JSON.stringify({
+      success: false,
+      message: 'Program not found',
+    }),
   };
 
   return {
