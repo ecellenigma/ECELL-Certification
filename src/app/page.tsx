@@ -36,8 +36,8 @@ export default function Home() {
       const url = URL.createObjectURL(blob);
       setPdf(url);
     } else {
-      const message = await res.text();
-      setError(message);
+      const json = await res.json();
+      setError(json.message);
       console.error("Error fetching certificate");
     }
   };

@@ -100,7 +100,7 @@ export const defaultField = (name: string, x: number = 0, y: number = 0) => {
     strikethrough: false,
     underline: false,
     required: false,
-    readOnly: true
+    readOnly: false
   };
 };
 
@@ -178,7 +178,7 @@ export function formatProgramName(name: string) {
 
 export function generateId() {
   // use time, random number and random string to generate a unique id to generate a unique id of lentgh 10
-  return (Date.now().toString(36) + Math.random().toString(36).substring(2, 4)).toUpperCase();
+  return Date.now().toString(36).toUpperCase();
 }
 
 // client side upload via post request

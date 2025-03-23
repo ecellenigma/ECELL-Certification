@@ -33,9 +33,18 @@ export default function Programs() {
       `Are you sure you want to delete program "${program}"?`
     );
     if (!action) return;
+    const tempDel = await fetch(`/admin/templates/${program}`, {
+      method: "DELETE",
+    });
+    const res = await tempDel.json();
     const success = await deleteProgram(program);
-    if (!success)
-      return alert(`An error occured deleting program "${program}"`);
+    if (!success || !res.success) {
+      alert(`An error occured deleting program "${program}"`);
+      if (res.message) {
+        alert(res.message);
+      }
+      return;
+    }
     // Refresh programs list
     setPrograms(programs.filter((p) => p !== program));
   };

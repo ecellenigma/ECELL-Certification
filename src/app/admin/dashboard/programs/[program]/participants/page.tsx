@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/providers/AuthContext";
 import { signOut } from "@/lib/firebase/auth";
+import { generateId } from "@/lib/helpers";
 
 export default function ProgramParticipants() {
   const { program } = useParams();
@@ -27,7 +28,8 @@ export default function ProgramParticipants() {
   const [selectedParticipant, setSelectedParticipant] =
     useState<Participant | null>(null);
   const [newParticipant, setNewParticipant] = useState<Participant>({
-    id: "",
+    id: generateId(),
+    email: "",
     name: "",
     rank: 0,
   });
@@ -36,6 +38,8 @@ export default function ProgramParticipants() {
     new Set()
   );
   const [selectAll, setSelectAll] = useState(false);
+
+  const fieldsToDisplay = ["name", "email", "rank"];
 
   useEffect(() => {
     async function fetchParticipants() {
@@ -78,8 +82,11 @@ export default function ProgramParticipants() {
       );
       setSelectedParticipant(null);
     } else {
+      if (!newParticipant.id) {
+        newParticipant.id = generateId();
+      }
       await addParticipant(program as string, newParticipant);
-      setNewParticipant({ id: "", name: "", rank: 0 });
+      setNewParticipant({ id: generateId(), email: "", name: "", rank: 0 });
       setIsAddingParticipant(false);
     }
     // Refresh participants list
@@ -163,9 +170,14 @@ export default function ProgramParticipants() {
                         onChange={handleSelectAll}
                       />
                     </th>
-                    <th className="py-2 px-4 border-b border-gray-700">ID</th>
-                    <th className="py-2 px-4 border-b border-gray-700">Name</th>
-                    <th className="py-2 px-4 border-b border-gray-700">Rank</th>
+                    {fieldsToDisplay.map((field) => (
+                      <th
+                        key={field}
+                        className="py-2 px-4 border-b border-gray-700"
+                      >
+                        {field.replace(/^\w/, (c) => c.toUpperCase())}
+                      </th>
+                    ))}
                     <th className="py-2 px-4 border-b border-gray-700">
                       Actions
                     </th>
@@ -182,15 +194,14 @@ export default function ProgramParticipants() {
                           onChange={() => handleSelect(participant.id)}
                         />
                       </td>
-                      <td className="py-2 px-4 border-b border-gray-700">
-                        {participant.id}
-                      </td>
-                      <td className="py-2 px-4 border-b border-gray-700">
-                        {participant.name}
-                      </td>
-                      <td className="py-2 px-4 border-b border-gray-700">
-                        {participant.rank}
-                      </td>
+                      {fieldsToDisplay.map((field) => (
+                        <td
+                          key={field}
+                          className="py-2 px-4 border-b border-gray-700"
+                        >
+                          {participant[field as keyof Participant]}
+                        </td>
+                      ))}
                       <td className="py-2 px-4 border-b border-gray-700">
                         <button
                           className="text-blue-300 hover:text-blue-500 mx-2"
@@ -240,34 +251,23 @@ export default function ProgramParticipants() {
               <div className="bg-gray-800 p-6 rounded-lg shadow-lg mt-6 w-full max-w-md">
                 <h2 className="text-xl font-semibold mb-4">Edit Participant</h2>
                 <form onSubmit={handleSubmit}>
-                  <div className="mb-4">
-                    <label className="block text-white mb-2" htmlFor="name">
-                      Name
-                    </label>
-                    <input
-                      className="w-full p-2 rounded bg-gray-700 text-white"
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={selectedParticipant.name}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-white mb-2" htmlFor="rank">
-                      Rank
-                    </label>
-                    <input
-                      className="w-full p-2 rounded bg-gray-700 text-white"
-                      type="text"
-                      id="rank"
-                      name="rank"
-                      value={selectedParticipant.rank}
-                      onChange={handleInputChange}
-                    />
-                  </div>
+                  {fieldsToDisplay.map((field) => (
+                    <div key={field} className="mb-4">
+                      <label className="block text-white mb-2" htmlFor={field}>
+                        {field.replace(/^\w/, (c) => c.toUpperCase())}
+                      </label>
+                      <input
+                        className="w-full p-2 rounded bg-gray-700 text-white"
+                        type="text"
+                        id={field}
+                        name={field}
+                        value={selectedParticipant[field as keyof Participant]}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  ))}
                   <button
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                    className="bg-indigo-700 hover:bg-indigo-900 text-white font-bold py-2 px-4 rounded w-full"
                     type="submit"
                   >
                     Save
@@ -280,47 +280,23 @@ export default function ProgramParticipants() {
               <div className="bg-gray-800 p-6 rounded-lg shadow-lg mt-6 w-full max-w-md">
                 <h2 className="text-xl font-semibold mb-4">Add Participant</h2>
                 <form onSubmit={handleSubmit}>
-                  <div className="mb-4">
-                    <label className="block text-white mb-2" htmlFor="id">
-                      ID
-                    </label>
-                    <input
-                      className="w-full p-2 rounded bg-gray-700 text-white"
-                      type="text"
-                      id="id"
-                      name="id"
-                      value={newParticipant.id}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-white mb-2" htmlFor="name">
-                      Name
-                    </label>
-                    <input
-                      className="w-full p-2 rounded bg-gray-700 text-white"
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={newParticipant.name}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-white mb-2" htmlFor="rank">
-                      Rank
-                    </label>
-                    <input
-                      className="w-full p-2 rounded bg-gray-700 text-white"
-                      type="text"
-                      id="rank"
-                      name="rank"
-                      value={newParticipant.rank}
-                      onChange={handleInputChange}
-                    />
-                  </div>
+                  {fieldsToDisplay.map((field) => (
+                    <div key={field} className="mb-4">
+                      <label className="block text-white mb-2" htmlFor={field}>
+                        {field.replace(/^\w/, (c) => c.toUpperCase())}
+                      </label>
+                      <input
+                        className="w-full p-2 rounded bg-gray-700 text-white"
+                        type="text"
+                        id={field}
+                        name={field}
+                        value={newParticipant[field as keyof Participant]}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  ))}
                   <button
-                    className="bg-indigo-700 hover:bg-indigo-900 text-white font-bold py-2 px-4 rounded w-full max-w-xs"
+                    className="bg-indigo-700 hover:bg-indigo-900 text-white font-bold py-2 px-4 rounded w-full"
                     type="submit"
                   >
                     Add
