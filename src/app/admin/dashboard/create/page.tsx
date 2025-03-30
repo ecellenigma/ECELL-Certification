@@ -20,7 +20,7 @@ import TokenInput, { Option } from "@/components/TokenInput";
 import {
   clientUploadBasePdf,
   generateId,
-  sanitizerogramName,
+  sanatizeProgramName,
 } from "@/lib/helpers";
 import { MultiValue } from "react-select";
 
@@ -52,16 +52,16 @@ export default function Create() {
         header: true,
         skipEmptyLines: true,
         transformHeader: (header) =>
-          sanitizerogramName(header.trim().toLowerCase()),
+          sanatizeProgramName(header.trim().toLowerCase()),
         complete: async (results) => {
           const data = results.data as { [key: string]: unknown }[];
           // console.log("CSV data:", data);
           setParsedValues(data as { [key: string]: unknown }[]);
           const fields = Object.keys(data[0]).map((k) => {
-            const sanatized = sanitizerogramName(k);
+            const sanatized = sanatizeProgramName(k);
             return {
               value: sanatized,
-              label: sanitizerogramName(sanatized),
+              label: sanatizeProgramName(sanatized),
             };
           });
           setFieldsToImport(fields);
@@ -137,7 +137,7 @@ export default function Create() {
     console.log("Templates updated");
     setMessage("Schema updated successfully");
     if (pdf) {
-      const result = await clientUploadBasePdf(pdf, name);
+      const result = await clientUploadBasePdf(pdf, sanatizeProgramName(name));
       const jsonRes = await result.json();
       if (jsonRes.success) {
         setMessage("Base PDF uploaded successfully!");
@@ -214,10 +214,10 @@ export default function Create() {
                 </label>
                 <TokenInput
                   options={Object.keys(parsedValues[0]).map((k) => {
-                    const sanatized = sanitizerogramName(k);
+                    const sanatized = sanatizeProgramName(k);
                     return {
                       value: sanatized,
-                      label: sanitizerogramName(sanatized),
+                      label: sanatizeProgramName(sanatized),
                     };
                   })}
                   value={fieldsToImport}

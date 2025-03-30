@@ -162,7 +162,7 @@ export async function constructTemplate(basePdf: Buffer, schemas: Schema[]) {
 // function to get the program name into the correct format
 // only a-z and 0-9 are allowed, rest all are converted to _ and repeated _ are reduced to single _
 // and it can't be program_list nor end with _schemas
-export function sanitizerogramName(name: string) {
+export function sanatizeProgramName(name: string) {
   const res = name.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/_schemas$/, 'schemas');
   if (res === 'programs_list') {
     throw new Error('Invalid program name');
