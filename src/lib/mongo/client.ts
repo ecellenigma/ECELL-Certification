@@ -16,18 +16,29 @@ export async function uploadBasePdf(file: File, programId: string) {
   // get only the version number from the programId from db
   const latestRes = (await Template.findOne({ program: programId }).select('version')) || { version: 0 };
   console.log('Latest version:', latestRes);
-  const res = await Template.findOneAndUpdate(
-    { program: programId },
-    { file: fileBuffer, version: latestRes.version + 1 },
-    { upsert: true }
-  );
-  return res;
+  try {
+    await Template.findOneAndUpdate(
+      { program: programId },
+      { file: fileBuffer, version: latestRes.version + 1 },
+      { upsert: true }
+    );
+    return true;
+  }
+  catch (err) {
+    console.error('Error uploading file:', err);
+    return false;
+  }
 };
 
 export async function deleteBasePdf(name: string) {
   await connect();
+  try {
   const res = await Template.findOneAndDelete({ program: name });
   return res;
+  }catch (err) {
+    console.error('Error deleting file:', err);
+    return false;
+  }
 }
 
 export async function getBasePdf(name: string): Promise<ArrayBuffer | null> {

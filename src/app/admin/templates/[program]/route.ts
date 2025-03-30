@@ -74,10 +74,14 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     return new Response(validity.body, { status: validity.status });
   }
   const res = await deleteBasePdf(program);
-  if (!res) return new Response(JSON.stringify({
+  if (res === false) return new Response(JSON.stringify({
     success: false,
     message: 'Error deleting file',
   }), { status: 500 });
+  if (res === null) return new Response(JSON.stringify({
+    success: false,
+    message: 'File not found',
+  }), { status: 404 });
   console.log(res);
   // if (!res.deletedCount) return new Response(JSON.stringify({
   //   success: false,
