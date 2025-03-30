@@ -19,7 +19,11 @@ import {
 import Notice from "@/components/Notice";
 import { useAuth } from "@/providers/AuthContext";
 import { signOut } from "@/lib/firebase/auth";
-import { clientUploadBasePdf, readFile } from "@/lib/helpers";
+import {
+  clientUploadBasePdf,
+  readFile,
+  sanatizeProgramName,
+} from "@/lib/helpers";
 
 export default function TemplatePage() {
   const { program } = useParams();
@@ -85,7 +89,10 @@ export default function TemplatePage() {
     if (basePdf) {
       try {
         const res = await (
-          await clientUploadBasePdf(basePdf, program as string)
+          await clientUploadBasePdf(
+            basePdf,
+            sanatizeProgramName(program as string)
+          )
         ).json();
         if (res.success) setBasePdfUrl(res.url);
         const basePdfData = await basePdf.arrayBuffer();
@@ -156,7 +163,9 @@ export default function TemplatePage() {
             </button>
           </div>
           <div className="text-white p-6 flex flex-col items-center">
-            <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100">Edit Program</h1>
+            <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100">
+              Edit Program
+            </h1>
             {message && <Notice type="success" message={message} />}
             <div className="bg-gray-900 p-8 rounded-lg shadow-lg w-full max-w-4xl">
               <div className="mb-4">

@@ -1,6 +1,6 @@
 import { doc, setDoc, getDoc, query, where, writeBatch, runTransaction, arrayUnion, deleteDoc, arrayRemove, updateDoc, getDocs, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase/clientApp";
-import { convertFirestoreArray, deleteCollection, sanitizerogramName } from "@/lib/helpers";
+import { convertFirestoreArray, deleteCollection, sanatizeProgramName } from "@/lib/helpers";
 import { Participant } from "@/types";
 import { Schema } from "@pdfme/common";
 // firestore structure
@@ -41,7 +41,7 @@ export async function addParticipant(program: string, participant: Participant) 
 
 export async function getSchemas(program: string) {
   try {
-    program = sanitizerogramName(program);
+    program = sanatizeProgramName(program);
   }
   catch (err) {
     console.log(err);
@@ -57,7 +57,7 @@ export async function getSchemas(program: string) {
 
 export async function setSchemas(program: string, schemas: Schema[]) {
   try {
-    program = sanitizerogramName(program);
+    program = sanatizeProgramName(program);
   }
   catch (err) {
     console.log(err);
@@ -75,7 +75,7 @@ export async function setSchemas(program: string, schemas: Schema[]) {
 
 export async function getParticipantWithSchema(id: string, program: string) {
   try {
-    program = sanitizerogramName(program);
+    program = sanatizeProgramName(program);
   }
   catch (err) {
     console.log(err);
@@ -95,7 +95,7 @@ export async function getParticipantWithSchema(id: string, program: string) {
 
 export async function getIdFromEmail(email: string, program: string) {
   try {
-    program = sanitizerogramName(program);
+    program = sanatizeProgramName(program);
   }
   catch (err) {
     console.log(err);
@@ -114,7 +114,7 @@ export async function getIdFromEmail(email: string, program: string) {
 export async function getParticipant(id: string, program: string) {
   console.log("Getting participant", id, program);
   try {
-    program = sanitizerogramName(program);
+    program = sanatizeProgramName(program);
   }
   catch (err) {
     console.log(err);
@@ -183,7 +183,7 @@ export async function deleteParticipant(program: string, participantId: string) 
 
 export async function setParticipants(program: string, participants: Participant[]) {
   try {
-    program = sanitizerogramName(program);
+    program = sanatizeProgramName(program);
   }
   catch (err) {
     console.log(err);
