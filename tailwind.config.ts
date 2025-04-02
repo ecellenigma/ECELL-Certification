@@ -15,11 +15,11 @@ export default {
       },
       colors: {
         "primary": {
-          DEFAULT: colors.indigo[700],
-          dark: colors.indigo[700],
+          DEFAULT: "#128EA0",
+          dark: "#0F7483",
           hover: {
-            DEFAULT: colors.indigo[800],
-            dark: colors.indigo[600],
+            DEFAULT: "#107A89",
+            dark: "#118292",
           }
         },
         "on-primary": {
@@ -27,28 +27,28 @@ export default {
           dark: colors.white,
         },
         "background": {
-          DEFAULT: colors.neutral[50],
-          dark: colors.neutral[950],
+          DEFAULT: "#F2F7FD",
+          dark: "#030B15",
         },
         "text": {
-          DEFAULT: colors.neutral[900],
-          dark: colors.neutral[100],
+          DEFAULT: "#030B15",
+          dark: "#F2F7FD",
           placeholder: {
-            DEFAULT: colors.neutral[400],
-            dark: colors.neutral[600],
+            DEFAULT: "#A1A9AA",
+            dark: "#455254",
           },
           secondary: {
-            DEFAULT: colors.neutral[700],
-            dark: colors.neutral[300],
+            DEFAULT: "#33494D",
+            dark: "#B2C9CC",
           },
           heading: {
-            DEFAULT: colors.neutral[800],
-            dark: colors.neutral[200],
+            DEFAULT: "#212B2C",
+            dark: "#B0C6C9",
           },
         },
         "border": {
-          DEFAULT: colors.neutral[300],
-          dark: colors.neutral[800],
+          DEFAULT: "#C4CBD4",
+          dark: "#21262C",
         }
       }
     },
