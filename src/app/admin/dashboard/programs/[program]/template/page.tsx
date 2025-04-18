@@ -137,7 +137,8 @@ export default function TemplatePage() {
 
   const handleTemplateSave = async (newTemplate: Template) => {
     try {
-      await setSchemas(program as string, newTemplate.schemas.flat());
+      const schemas = Object.assign({}, newTemplate.schemas[0]);
+      await setSchemas(program as string, schemas);
       setTemplate(newTemplate);
       setMessage("Template saved successfully!");
     } catch (error: unknown) {
