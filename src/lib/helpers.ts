@@ -178,7 +178,7 @@ export function formatProgramName(name: string) {
 
 export function generateId() {
   // use time, random number and random string to generate a unique id to generate a unique id of lentgh 10
-  return Date.now().toString(36).toUpperCase();
+  return (Math.random().toString(36).substring(2, 6) + Date.now().toString(36).substring(2, 6)).toUpperCase()
 }
 
 // client side upload via post request

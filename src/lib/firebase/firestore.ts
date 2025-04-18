@@ -55,7 +55,7 @@ export async function getSchemas(program: string) {
   }
 }
 
-export async function setSchemas(program: string, schemas: Schema[]) {
+export async function setSchemas(program: string, schemas: { [index: number]: Schema }) {
   try {
     program = sanatizeProgramName(program);
   }
